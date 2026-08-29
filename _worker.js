@@ -1,5 +1,5 @@
 // ============================================================
-// NyXia — Portail Séléna · Retrouver une amie dans le miroir — Worker complet (chats + voix + images + D1)
+// NyXia — Portail Séléna · Retrouver une amie dans le miroir - Worker complet (chats + voix + images + D1)
 // ============================================================
 
 const SYSTEM_PROMPTS = {
