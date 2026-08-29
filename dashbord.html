@@ -341,6 +341,11 @@
           <span class="nav-text"><span class="nav-name">Séléna</span><span class="nav-sub">Développement Personnel</span></span>
           <span class="nav-arrow">›</span>
         </div>
+        <div class="nav-item" id="nav-miroir" onclick="openAgentTab('miroir')">
+          <img class="nav-avatar" src="/Selena.png" alt="Exercice Miroir">
+          <span class="nav-text"><span class="nav-name">🪞 Exercice Miroir</span><span class="nav-sub">100 exercices · autonome</span></span>
+          <span class="nav-arrow">›</span>
+        </div>
       </div>
       <div class="sidebar-section">
         <div class="sidebar-label">Atelier de développement</div>
@@ -783,7 +788,13 @@
 
     /* ═══════ MESSAGES DES IFRAMES → personnage ═══════ */
     window.addEventListener('message', function(e) {
-      if (e.data && e.data.type === 'nyxia_suggest' && e.data.text) {
+      if (!e.data) return
+      // Ouverture d'un agent précis (ex. page Miroir → Séléna). Le contexte est déjà déposé dans sessionStorage par l'iframe.
+      if (e.data.type === 'nyxia_open' && e.data.agent && AGENT_PAGES[e.data.agent]) {
+        openAgentTab(e.data.agent)
+        return
+      }
+      if (e.data.type === 'nyxia_suggest' && e.data.text) {
         // Ouvre NyXia et laisse l'iframe gérer (le chat est maintenant dans l'iframe)
         openAgentTab('diane')
       }
