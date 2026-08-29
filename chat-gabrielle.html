@@ -118,16 +118,16 @@
 
   <div class="chat-area">
     <div class="chat-header">
-      <span id="chat-header-avatar"><img src="/Lena.png" alt="Léna"></span>
+      <span id="chat-header-avatar"><img src="/Gabrielle.png" alt="Gabrielle"></span>
       <div class="chat-header-info">
-        <div class="chat-header-name" id="chat-header-name">Léna</div>
+        <div class="chat-header-name" id="chat-header-name">Gabrielle</div>
         <div class="chat-header-sub" id="chat-header-sub">Consultation spirituelle & prompts</div>
       </div>
       <button type="button" class="btn-new-chat" id="btn-welcome-video" onclick="rejouerVideoAccueil()" title="Revoir la vidéo d'accueil">🎬 Vidéo</button>
       <button type="button" class="btn-new-chat" onclick="nouveauChat()" title="Effacer cette conversation">✨ Nouveau chat</button>
     </div>
 
-    <div class="chat-messages active-chat" id="chat-messages-lena"></div>
+    <div class="chat-messages active-chat" id="chat-messages-gabrielle"></div>
     <div id="formation-launch-wrap" style="display:none;padding:8px 24px 0;flex-shrink:0">
       <button type="button" id="formation-launch" onclick="foLaunch()" class="fo-launch">
         ✨ Commencer ma formation
@@ -149,7 +149,7 @@
         📎<input type="file" id="chat-file" accept=".pdf,.zip,image/*" style="display:none">
       </label>
       <button id="btn-mic" onclick="toggleMic()" title="Parler" style="flex-shrink:0;width:36px;height:36px;border-radius:9px;border:1px solid rgba(123,92,255,0.2);background:rgba(123,92,255,0.06);color:var(--t3);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px">🎤</button>
-      <textarea class="chat-input" id="chat-input" placeholder="Écris ou parle à Léna..." rows="1"></textarea>
+      <textarea class="chat-input" id="chat-input" placeholder="Écris ou parle à Gabrielle..." rows="1"></textarea>
       <button class="btn-send" id="btn-send" onclick="sendMessage()">➤</button>
     </div>
     <div class="chat-hint">Entrée pour envoyer · Shift+Entrée pour un retour à la ligne</div>
@@ -161,18 +161,18 @@
      PAGE DIANE AUTONOME — isolée du Dashboard, verrouillée sur l'agent « diane ».
   ═══════════════════════════════════════════════════════════════════ */
 
-  var _currentAgent = 'lena'
+  var _currentAgent = 'gabrielle'
 
   var ALPHA_INFO = {
-    lena: {
-      name: 'Léna',
-      sub: 'Consultation spirituelle & prompts',
-      greeting: '🔮 Allô…\n\nMoi c\\\'est Léna.\n\nJe t\\\'aide à **mieux répondre en consultation spirituelle** — avec des prompts pour structurer tes lectures, tes messages clients, tes contenus et tes offres.\n\nDis-moi ce dont tu as besoin…\n\n👉 Un prompt pour répondre à une question de consultation\n👉 Un prompt pour un script ou un post spirituel\n👉 Un prompt pour créer une offre de service\n\nÉcris ta demande. Je te renvoie un prompt clair et utilisable. ✦'
+    gabrielle: {
+      name: 'Gabrielle',
+      sub: 'Spécialiste EFT · libération émotionnelle',
+      greeting: "🎭 Bonjour, je suis Gabrielle. Je t'accompagne dans la libération émotionnelle (EFT), en douceur et à ton rythme. Dis-moi : quelle émotion t'habite en ce moment ?"
     }
   }
-  var AGENT_IMAGES = { lena: '/Lena.png' }
-  var AGENT_WELCOME_AUDIO = { lena: null }   // ← mets ton fichier audio ici si tu en as un
-  var AGENT_WELCOME_VIDEO = { lena: 'https://d1yei2z3i6k35z.cloudfront.net/1872133/6a91b49c18e2c6.93667676_Bienvenue_Portail_Lena.mp4' }                    // ← mets l'URL de ta vidéo d'accueil ici si tu en as une
+  var AGENT_IMAGES = { gabrielle: '/Gabrielle.png' }
+  var AGENT_WELCOME_AUDIO = { gabrielle: null }   // ← mets ton fichier audio ici si tu en as un
+  var AGENT_WELCOME_VIDEO = { gabrielle: null }   // ← mets l'URL de ta vidéo d'accueil ici si tu en as une
 
   /* ═══════ AUTH ═══════ */
   var sessionToken = sessionStorage.getItem('nyxia_token') || ''
@@ -197,7 +197,7 @@
     }).catch(function(){ init() })
   })()
 
-  var chatHistories = { lena: [] }
+  var chatHistories = { gabrielle: [] }
   var CHAT_STORAGE_KEY = 'nyxia_chat_' + _currentAgent
 
   function loadChatFromStorage() {
@@ -259,31 +259,31 @@
 
   function avatarHtmlFor(key, sizeClass) {
     sizeClass = sizeClass || 'msg-avatar'
-    var src = AGENT_IMAGES[key] || AGENT_IMAGES.lena
-    var name = (ALPHA_INFO[key] && ALPHA_INFO[key].name) || 'Léna'
+    var src = AGENT_IMAGES[key] || AGENT_IMAGES.gabrielle
+    var name = (ALPHA_INFO[key] && ALPHA_INFO[key].name) || 'Gabrielle'
     return '<img src="' + src + '" class="' + sizeClass + '" alt="' + name + '">'
   }
   function updateHeaderAvatar(key) {
     var el = document.getElementById('chat-header-avatar')
     if (!el) return
-    el.innerHTML = '<img src="' + (AGENT_IMAGES[key] || AGENT_IMAGES.lena) + '" alt="' + ((ALPHA_INFO[key] && ALPHA_INFO[key].name) || 'Léna') + '">'
+    el.innerHTML = '<img src="' + (AGENT_IMAGES[key] || AGENT_IMAGES.gabrielle) + '" alt="' + ((ALPHA_INFO[key] && ALPHA_INFO[key].name) || 'Gabrielle') + '">'
   }
 
   function init() {
     loadChatFromStorage()
-    document.getElementById('chat-header-name').textContent = ALPHA_INFO.lena.name
-    document.getElementById('chat-header-sub').textContent = ALPHA_INFO.lena.sub
-    updateHeaderAvatar('lena')
-    document.title = 'Léna — NyXia'
+    document.getElementById('chat-header-name').textContent = ALPHA_INFO.gabrielle.name
+    document.getElementById('chat-header-sub').textContent = ALPHA_INFO.gabrielle.sub
+    updateHeaderAvatar('gabrielle')
+    document.title = 'Gabrielle — NyXia'
 
     renderStoredMessages()
-    var videoUrl = AGENT_WELCOME_VIDEO.lena
+    var videoUrl = AGENT_WELCOME_VIDEO.gabrielle
     if (videoUrl) {
-      var alreadyPlayed = hasVideoAutoplayed('lena')
+      var alreadyPlayed = hasVideoAutoplayed('gabrielle')
       // Autoplay SEULEMENT la première fois qu'on ouvre ce personnage dans la session
       // Revenir sur Diane après Éric → vidéo visible, SANS autoplay
-      addVideoMessage(videoUrl, 'lena', { autoplay: !alreadyPlayed })
-      if (!alreadyPlayed) markVideoAutoplayed('lena')
+      addVideoMessage(videoUrl, 'gabrielle', { autoplay: !alreadyPlayed })
+      if (!alreadyPlayed) markVideoAutoplayed('gabrielle')
     }
     // Vidéo : autoplay uniquement à la première visite ; ensuite play manuel
 
@@ -604,7 +604,7 @@
     var bs = 'padding:2px 9px;border-radius:50px;border:1px solid rgba(123,92,255,0.15);background:rgba(123,92,255,0.04);color:var(--t4);font-family:Outfit,sans-serif;font-size:11px;cursor:pointer;transition:all .15s'
     var acts = document.createElement('div'); acts.style.cssText = 'display:flex;gap:4px;flex-wrap:wrap;margin-top:2px'
     var textForSpeak = textWithoutImg || text
-    var agentName = (ALPHA_INFO[msgAgent] && ALPHA_INFO[msgAgent].name) || 'Léna'
+    var agentName = (ALPHA_INFO[msgAgent] && ALPHA_INFO[msgAgent].name) || 'Gabrielle'
 
     var spk = document.createElement('button'); spk.style.cssText = bs; spk.textContent = '🔊 Écouter'
     spk.addEventListener('click', function() { speakMsg(spk, textForSpeak) }); acts.appendChild(spk)
@@ -627,7 +627,7 @@
     pdfBtn.addEventListener('click', function() {
       var w = window.open('', '_blank'); if (!w) return
       var body = '<h2 style="color:#7B5CFF">' + agentName + ' — NyXia</h2>' + escHtml(text).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>')
-      w.document.write('<!DOCTYPE html><html><head><title>Léna — NyXia</title><style>body{font-family:Georgia,serif;max-width:760px;margin:48px auto;line-height:1.85}</style></head><body>' + body + '</body></html>')
+      w.document.write('<!DOCTYPE html><html><head><title>Gabrielle — NyXia</title><style>body{font-family:Georgia,serif;max-width:760px;margin:48px auto;line-height:1.85}</style></head><body>' + body + '</body></html>')
       w.document.close(); setTimeout(function() { w.print() }, 300)
     }); acts.appendChild(pdfBtn)
 
