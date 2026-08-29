@@ -305,13 +305,14 @@
     sending=true; el('send').disabled=true; addTyping();
     fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({message:lastUserMessage, history:history.slice(-10), userName:userName, agent:AGENT.code, attachment:null, token:token})})
-      .then(function(r){return r.json()}).then(function(d){
+      .then(function(r){ return r.text().then(function(txt){ var d; try{ d=JSON.parse(txt); }catch(e){ d={content:'Réponse inattendue ('+r.status+') : '+(txt||'').slice(0,300)}; } return d; }); })
+      .then(function(d){
         rmTyping();
-        var reply=d.content||'Petite interruption... réessaie dans un instant 💜';
+        var reply=d.content||d.error||'Petite interruption... réessaie dans un instant 💜';
         addBot(reply, true); history.push({role:'assistant',content:reply});
         if(history.length>20) history=history.slice(-20);
         sending=false; el('send').disabled=false;
-      }).catch(function(){ rmTyping(); addBot('Petite interruption... réessaie dans un instant 💜'); sending=false; el('send').disabled=false; });
+      }).catch(function(err){ rmTyping(); addBot('Erreur réseau : '+((err&&err.message)||err)); sending=false; el('send').disabled=false; });
   }
 
   // ── Voix (Éric répond à voix haute) ──
