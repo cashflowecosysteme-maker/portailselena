@@ -2933,6 +2933,7 @@ const url = new URL(request.url);
       if (path === '/api/formation/list' && request.method === 'POST') return await handleFormationList(request, env);
       if (path === '/api/formation/module' && request.method === 'POST') return await handleFormationModule(request, env);
       if (path === '/api/formation/progress' && request.method === 'POST') return await handleFormationProgressRoute(request, env);
+      if (path === '/api/miroir/exercices' && request.method === 'POST') return await handleMiroirExercices(request, env);
       // ── Formation Vivante : administration (ajout du vrai contenu par Diane) ──
       if (path === '/api/admin/formation/list' && request.method === 'GET') return await handleAdminListFormations(request, env);
       if (path === '/api/admin/formation/save' && request.method === 'POST') return await handleAdminSaveFormation(request, env);
@@ -4741,6 +4742,23 @@ async function handleFormationList(request, env) {
     progress: progress[f.id] || null
   }));
   return json({ formations: out });
+}
+
+// ───────────── EXERCICES MIROIRS — endpoint page autonome (miroir.html) ─────────────
+// Lecture seule. Même source que Séléna : CASHFLOW_KV['selena:exercices_miroirs'].
+// Renvoie le tableau complet ; la page fait le tirage / filtrage par axe côté client.
+async function handleMiroirExercices(request, env) {
+  const body = await request.json().catch(() => ({}));
+  const session = await getSessionFromToken(env, body.token);
+  if (!session) return json({ error: 'Session expirée. Reconnecte-toi.' }, 401);
+  const raw = await env.CASHFLOW_KV.get(SELENA_MIRROR_EXERCISES_KV_KEY);
+  if (!raw) return json({ exercices: [] });
+  let parsed;
+  try { parsed = JSON.parse(raw); } catch (_) { return json({ exercices: [] }); }
+  const exercices = Array.isArray(parsed)
+    ? parsed
+    : (Array.isArray(parsed.exercices) ? parsed.exercices : (Array.isArray(parsed.items) ? parsed.items : []));
+  return json({ exercices });
 }
 
 // Contenu structuré complet d'un module (blocs réels, dans l'ordre) — pour un affichage déterministe.
