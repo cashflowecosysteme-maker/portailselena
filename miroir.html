@@ -8,59 +8,63 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root { --p:#7B5CFF; --p2:#5A6CFF; --p3:#a78bfa; --gold:#F4C842; --ink:#3a2f22; }
+    :root {
+      --bg1:#0A1628; --bg2:#0F1C3F; --bg3:#1A2554;
+      --p:#7B5CFF; --p2:#5A6CFF; --p3:#a78bfa; --gold:#F4C842;
+      --t1:#ffffff; --t2:#d6d9f0; --t3:rgba(214,217,240,0.72); --t4:rgba(214,217,240,0.45);
+    }
     *,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
-    html,body { min-height:100%; background:#060a18; font-family:'Outfit',sans-serif; color:#fff; }
-    .bg { position:fixed; inset:0; z-index:0; background: radial-gradient(ellipse 80% 60% at 60% 30%, rgba(60,20,120,0.55) 0%, transparent 70%), radial-gradient(ellipse 50% 40% at 20% 90%, rgba(30,10,80,0.4) 0%, transparent 60%), #060a18; }
-    .particles { position:fixed; inset:0; z-index:1; pointer-events:none; overflow:hidden; }
-    .particle { position:absolute; border-radius:50%; opacity:0; animation:floatUp linear infinite; }
-    @keyframes floatUp { 0%{opacity:0;transform:translateY(0) scale(0);} 10%{opacity:0.6;} 90%{opacity:0.2;} 100%{opacity:0;transform:translateY(-100vh) scale(1.5);} }
+    html,body { min-height:100%; background:var(--bg1); font-family:'Outfit',sans-serif; color:var(--t1); }
+    #starry-canvas { position:fixed; inset:0; z-index:0; pointer-events:none; }
 
     .wrap { position:relative; z-index:2; max-width:720px; margin:0 auto; padding:40px 24px 64px; }
     .eyebrow { text-align:center; font-size:11px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:var(--p3); opacity:0.85; margin-bottom:12px; }
     h1 { font-family:'Cormorant Garamond',serif; font-weight:300; font-size:clamp(30px,5vw,46px); line-height:1.1; text-align:center; margin-bottom:14px; }
     h1 em { font-style:italic; background:linear-gradient(135deg,var(--p3),#c4b5fd,var(--p2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-    .intro { text-align:center; font-size:14.5px; font-weight:300; line-height:1.75; color:rgba(214,217,240,0.72); max-width:520px; margin:0 auto 28px; }
+    .intro { text-align:center; font-size:14.5px; font-weight:300; line-height:1.75; color:var(--t3); max-width:520px; margin:0 auto 28px; }
 
     .controls { display:flex; flex-direction:column; align-items:center; gap:18px; margin-bottom:28px; }
-    .btn-draw { display:inline-flex; align-items:center; gap:12px; padding:16px 34px; border-radius:60px; font-family:'Outfit',sans-serif; font-size:16px; font-weight:600; color:#fff; cursor:pointer; border:1px solid rgba(163,139,250,0.35); background:rgba(123,92,255,0.14); backdrop-filter:blur(20px); box-shadow:inset 0 1px 0 rgba(255,255,255,0.12), 0 8px 32px rgba(0,0,0,0.3), 0 0 40px rgba(123,92,255,0.18); transition:all .35s cubic-bezier(0.22,1,0.36,1); }
-    .btn-draw:hover { background:rgba(123,92,255,0.24); border-color:rgba(163,139,250,0.6); box-shadow:0 0 60px rgba(123,92,255,0.4); transform:translateY(-2px); }
+    .btn-draw { display:inline-flex; align-items:center; gap:12px; padding:15px 34px; border-radius:60px; font-family:'Outfit',sans-serif; font-size:16px; font-weight:600; color:#fff; cursor:pointer; border:none; background:linear-gradient(135deg,var(--p),var(--p2)); box-shadow:0 8px 32px rgba(0,0,0,0.35), 0 0 40px rgba(123,92,255,0.28); transition:all .3s cubic-bezier(0.22,1,0.36,1); }
+    .btn-draw:hover { transform:translateY(-2px); box-shadow:0 0 60px rgba(123,92,255,0.5); }
 
-    .axes-label { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(214,217,240,0.5); text-align:center; }
+    .axes-label { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--t4); text-align:center; }
     .chips { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; max-width:640px; }
-    .chip { font-size:12px; font-weight:500; padding:7px 14px; border-radius:50px; cursor:pointer; color:rgba(214,217,240,0.8); border:1px solid rgba(123,92,255,0.22); background:rgba(123,92,255,0.06); transition:all .2s ease; }
-    .chip:hover { border-color:rgba(163,139,250,0.55); background:rgba(123,92,255,0.16); }
-    .chip.active { color:#fff; border-color:var(--p3); background:rgba(123,92,255,0.3); box-shadow:0 0 18px rgba(123,92,255,0.35); }
+    .chip { font-size:12px; font-weight:500; padding:7px 14px; border-radius:50px; cursor:pointer; color:var(--t2); border:1px solid rgba(123,92,255,0.25); background:rgba(123,92,255,0.08); transition:all .2s ease; }
+    .chip:hover { border-color:rgba(163,139,250,0.55); background:rgba(123,92,255,0.18); }
+    .chip.active { color:#fff; border-color:var(--p3); background:rgba(123,92,255,0.32); box-shadow:0 0 18px rgba(123,92,255,0.35); }
 
-    /* Carte parchemin */
-    .parch { display:none; position:relative; margin:6px auto 0; max-width:600px; padding:38px 40px 34px; border-radius:14px; color:var(--ink); background:linear-gradient(160deg,#f6ecd6 0%,#efe0c4 60%,#e6d4b3 100%); box-shadow:0 24px 60px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.35), inset 0 0 60px rgba(180,150,90,0.25); font-family:'Cormorant Garamond',serif; animation:cardIn .5s cubic-bezier(0.22,1,0.36,1) both; }
+    /* Carte exercice — verre dépoli, charte du site */
+    .card { display:none; position:relative; margin:6px auto 0; max-width:600px; padding:34px 36px 30px; border-radius:18px;
+      background:rgba(15,28,63,0.6); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+      border:1px solid rgba(123,92,255,0.28);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,0.06), 0 20px 50px rgba(0,0,0,0.45), 0 0 44px rgba(123,92,255,0.14);
+      animation:cardIn .5s cubic-bezier(0.22,1,0.36,1) both; }
     @keyframes cardIn { from{opacity:0;transform:translateY(14px) scale(.98);} to{opacity:1;transform:none;} }
-    .parch.show { display:block; }
-    .parch .axe { font-family:'Outfit',sans-serif; font-size:10.5px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:#9a7b34; }
-    .parch h2 { font-weight:600; font-size:29px; line-height:1.15; margin:6px 0 4px; }
-    .parch .duree { font-family:'Outfit',sans-serif; font-size:12px; color:#8a744f; margin-bottom:18px; }
-    .parch .phrase { font-style:italic; font-size:22px; line-height:1.4; text-align:center; color:#5a4a2a; padding:14px 8px; margin:6px 0 20px; border-top:1px solid rgba(154,123,52,0.3); border-bottom:1px solid rgba(154,123,52,0.3); }
-    .parch .sect-label { font-family:'Outfit',sans-serif; font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#9a7b34; margin:16px 0 8px; }
-    .parch ol { list-style:none; counter-reset:step; padding:0; }
-    .parch ol li { font-size:18px; line-height:1.5; padding:5px 0 5px 34px; position:relative; }
-    .parch ol li::before { counter-increment:step; content:counter(step); position:absolute; left:0; top:5px; width:22px; height:22px; border-radius:50%; background:rgba(154,123,52,0.18); color:#7a6229; font-family:'Outfit',sans-serif; font-size:12px; font-weight:600; display:flex; align-items:center; justify-content:center; }
-    .parch .cloture { font-size:17px; line-height:1.5; color:#5a4a2a; }
-    .parch .cloture::before { content:'🕯️ '; }
-    .parch .indic { font-family:'Outfit',sans-serif; font-size:12px; color:#8a744f; margin-top:18px; padding-top:12px; border-top:1px dashed rgba(154,123,52,0.3); }
+    .card.show { display:block; }
+    .card .axe { font-size:10.5px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--gold); }
+    .card h2 { font-family:'Cormorant Garamond',serif; font-weight:600; font-size:30px; line-height:1.15; margin:6px 0 4px; color:#fff; }
+    .card .duree { font-size:12px; color:var(--t4); margin-bottom:16px; }
+    .card .phrase { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:23px; line-height:1.4; text-align:center; color:var(--gold); padding:16px 8px; margin:6px 0 20px; border-top:1px solid rgba(244,200,66,0.22); border-bottom:1px solid rgba(244,200,66,0.22); }
+    .card .sect-label { font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--p3); margin:16px 0 8px; }
+    .card ol { list-style:none; counter-reset:step; padding:0; }
+    .card ol li { font-size:15px; line-height:1.55; color:var(--t2); padding:5px 0 5px 36px; position:relative; }
+    .card ol li::before { counter-increment:step; content:counter(step); position:absolute; left:0; top:4px; width:24px; height:24px; border-radius:50%; background:rgba(123,92,255,0.22); color:#c4b5fd; font-size:12px; font-weight:600; display:flex; align-items:center; justify-content:center; }
+    .card .cloture { font-size:15px; line-height:1.55; color:var(--t2); }
+    .card .cloture::before { content:'🕯️ '; }
+    .card .indic { font-size:12px; color:var(--t4); margin-top:18px; padding-top:12px; border-top:1px dashed rgba(123,92,255,0.25); }
 
     .card-actions { display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin-top:22px; }
-    .btn2 { display:inline-flex; align-items:center; gap:9px; padding:13px 24px; border-radius:50px; font-family:'Outfit',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:all .3s ease; border:1px solid rgba(163,139,250,0.35); background:rgba(123,92,255,0.12); color:#fff; backdrop-filter:blur(14px); }
+    .btn2 { display:inline-flex; align-items:center; gap:9px; padding:12px 24px; border-radius:50px; font-family:'Outfit',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:all .3s ease; border:1px solid rgba(123,92,255,0.3); background:rgba(123,92,255,0.12); color:#fff; }
     .btn2:hover { background:rgba(123,92,255,0.24); transform:translateY(-2px); }
-    .btn2.gold { border-color:rgba(244,200,66,0.5); background:rgba(244,200,66,0.14); }
-    .btn2.gold:hover { background:rgba(244,200,66,0.24); box-shadow:0 0 30px rgba(244,200,66,0.3); }
+    .btn2.gold { border:none; background:linear-gradient(135deg,var(--gold),#e0a92e); color:#3a2f22; }
+    .btn2.gold:hover { box-shadow:0 0 30px rgba(244,200,66,0.4); }
 
-    .state { text-align:center; color:rgba(214,217,240,0.6); font-size:14px; padding:30px 0; }
-    @media(max-width:560px){ .parch{padding:30px 22px;} .parch h2{font-size:25px;} .parch .phrase{font-size:19px;} }
+    .state { text-align:center; color:var(--t4); font-size:14px; padding:30px 0; }
+    @media(max-width:560px){ .card{padding:28px 22px;} .card h2{font-size:26px;} .card .phrase{font-size:20px;} }
   </style>
 </head>
 <body>
-  <div class="bg"></div>
-  <div class="particles" id="particles"></div>
+  <canvas id="starry-canvas"></canvas>
 
   <div class="wrap">
     <div class="eyebrow">🪞 Atelier du Miroir</div>
@@ -78,7 +82,7 @@
 
     <div class="state" id="state">✦ Chargement des exercices…</div>
 
-    <div class="parch" id="parch">
+    <div class="card" id="card">
       <div class="axe" id="p-axe"></div>
       <h2 id="p-titre"></h2>
       <div class="duree" id="p-duree"></div>
@@ -96,6 +100,7 @@
     </div>
   </div>
 
+  <script src="/starry-bg.js" defer></script>
   <script>
     // ── Auth : récupère le token comme les pages de chat ──
     var token = sessionStorage.getItem('nyxia_token') || '';
@@ -104,7 +109,6 @@
     if (token) { try { sessionStorage.setItem('nyxia_token', token); } catch(e){} }
 
     function el(id){ return document.getElementById(id); }
-    function esc(s){ var d=document.createElement('div'); d.textContent = (s==null?'':s); return d.innerHTML; }
 
     // ── Lecture tolérante aux noms de champs ──
     function F(ex){
@@ -113,8 +117,8 @@
         axe: ex.axe || ex.theme || ex.themes || '',
         duree: ex.duree || ex.duration || '',
         phrase: ex.phrase || ex.mantra || '',
-        etapes: ex.etapes || ex["étapes"] || ex.steps || ex.consigne || ex.contenu || '',
-        cloture: ex.cloture || ex["clôture"] || '',
+        etapes: ex.etapes || ex["\u00e9tapes"] || ex.steps || ex.consigne || ex.contenu || '',
+        cloture: ex.cloture || ex["cl\u00f4ture"] || '',
         indic: ex.indications || ex.mots_cles || ex.keywords || ''
       };
     }
@@ -122,7 +126,7 @@
       return String(txt||'').split(/\.\s+/).map(function(s){ return s.replace(/\.+$/,'').trim(); }).filter(function(s){ return s.length > 1; });
     }
 
-    var ALL = [], POOL = [], AXES = [], activeAxe = null, current = null;
+    var ALL = [], POOL = [], AXES = [], current = null;
 
     function load(){
       if (!token){ el('state').textContent = "Session expirée. Reconnecte-toi depuis le portail."; return; }
@@ -151,7 +155,6 @@
       });
     }
     function setAxe(axe, chipEl){
-      activeAxe = axe;
       POOL = axe ? ALL.filter(function(ex){ return F(ex).axe === axe; }) : ALL.slice();
       document.querySelectorAll('.chip').forEach(function(x){ x.classList.remove('active'); });
       if (chipEl) chipEl.classList.add('active');
@@ -170,28 +173,28 @@
     function render(f){
       el('p-axe').textContent = f.axe || '';
       el('p-titre').textContent = f.titre;
-      el('p-duree').textContent = f.duree ? ('⏳ ' + f.duree) : '';
-      el('p-phrase').textContent = f.phrase ? ('« ' + f.phrase + ' »') : '';
+      el('p-duree').textContent = f.duree ? ('\u23f3 ' + f.duree) : '';
+      el('p-phrase').textContent = f.phrase ? ('\u00ab ' + f.phrase + ' \u00bb') : '';
       var ol = el('p-etapes'); ol.innerHTML = '';
       splitSteps(f.etapes).forEach(function(s){ var li = document.createElement('li'); li.textContent = s; ol.appendChild(li); });
       el('p-cloture').textContent = f.cloture || '';
-      el('p-indic').textContent = f.indic ? ('Indiqué pour : ' + f.indic) : '';
-      el('parch').classList.add('show');
+      el('p-indic').textContent = f.indic ? ('Indiqu\u00e9 pour : ' + f.indic) : '';
+      el('card').classList.add('show');
       el('actions').style.display = 'flex';
-      el('parch').scrollIntoView({ behavior:'smooth', block:'start' });
+      el('card').scrollIntoView({ behavior:'smooth', block:'start' });
     }
 
     // ── Pont vers Séléna : dépose l'exercice, demande au dashboard d'ouvrir Séléna ──
     function approfondir(){
       if (!current) return;
       var f = F(current);
-      var prompt = "J'aimerais approfondir cet exercice du miroir avec toi : « " + f.titre + " »"
+      var msg = "J'aimerais approfondir cet exercice du miroir avec toi : \u00ab " + f.titre + " \u00bb"
         + (f.axe ? (" (axe : " + f.axe + ")") : "") + ".\n\n"
         + (f.phrase ? ("Phrase : " + f.phrase + "\n") : "")
-        + (f.etapes ? ("Étapes : " + f.etapes + "\n") : "")
-        + (f.cloture ? ("Clôture : " + f.cloture + "\n") : "")
-        + "\nPeux-tu m'accompagner à le vivre, à mon rythme, une seule étape à la fois ?";
-      try { sessionStorage.setItem('pending_selena', prompt); } catch(e){}
+        + (f.etapes ? ("\u00c9tapes : " + f.etapes + "\n") : "")
+        + (f.cloture ? ("Cl\u00f4ture : " + f.cloture + "\n") : "")
+        + "\nPeux-tu m'accompagner \u00e0 le vivre, \u00e0 mon rythme, une seule \u00e9tape \u00e0 la fois ?";
+      try { sessionStorage.setItem('pending_selena', msg); } catch(e){}
       if (window.parent && window.parent !== window) {
         window.parent.postMessage({ type:'nyxia_open', agent:'selena' }, '*');
       } else {
@@ -202,15 +205,6 @@
     el('btn-draw').addEventListener('click', draw);
     el('btn-again').addEventListener('click', draw);
     el('btn-selena').addEventListener('click', approfondir);
-
-    // ── Particules ──
-    (function(){
-      var c = el('particles'); var cl = ["#a78bfa","#7B5CFF","#5A6CFF","#c4b5fd","#ffffff"];
-      for (var i=0;i<24;i++){ var p=document.createElement('div'); p.className='particle';
-        var s=Math.random()*3+1;
-        p.style.cssText="width:"+s+"px;height:"+s+"px;left:"+(Math.random()*100)+"%;bottom:"+(Math.random()*-20)+"%;animation-duration:"+(Math.random()*12+8)+"s;animation-delay:"+(Math.random()*10)+"s;";
-        p.style.background=cl[Math.floor(Math.random()*cl.length)]; c.appendChild(p); }
-    })();
 
     load();
   </script>
