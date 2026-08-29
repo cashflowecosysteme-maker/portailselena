@@ -1282,8 +1282,9 @@ const SESSION_TTL = 60 * 60 * 24 * 7;   // 7 jours
 const ADMIN_SESSION_TTL = 60 * 60 * 12; // 12 heures
 const SELENA_MIRROR_EXERCISES_KV_KEY = 'selena:exercices_miroirs';
 const ACTIVE_AGENTS = new Set([
-  'diane', 'nyxia', 'lena',
-  'sophia', 'aletheia', 'cassandre', 'celeste'
+  'diane', 'nyxia', 'lena', 'selena',
+  'sophia', 'aletheia', 'cassandre', 'celeste',
+  'gabrielle', 'alexandra', 'daphnee'
 ]);
 
 // Protocole partagé par tous les personnages. Une vidéo n'est jamais choisie au hasard :
