@@ -1,0 +1,32 @@
+name = "portaillena"
+main = "_worker.js"
+compatibility_date = "2026-08-25"
+workers_dev = false
+preview_urls = false
+keep_vars = true
+
+[assets]
+directory = "."
+binding = "ASSETS"
+
+[[routes]]
+pattern = "portaillena.nyxia.top"
+zone_name = "nyxia.top"
+custom_domain = true
+
+[[kv_namespaces]]
+binding = "CASHFLOW_KV"
+id = "106db6da016d49d2b480452f19bad695"
+
+[ai]
+binding = "AI"
+
+[[vectorize]]
+binding = "VECTORIZE_INDEX"
+index_name = "univers-livres"
+
+[vars]
+SITE_URL = "portaillena.nyxia.top"
+[[kv_namespaces]]
+binding = "SPIRITUEL_KV"
+id = "3e730b1c49f94e32a97cceff3b60a773"
