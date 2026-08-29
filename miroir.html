@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exercices du Miroir — Séléna · NyXia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --p:#7B5CFF; --p2:#5A6CFF; --p3:#a78bfa; --gold:#F4C842; --ink:#3a2f22; }
+    *,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+    html,body { min-height:100%; background:#060a18; font-family:'Outfit',sans-serif; color:#fff; }
+    .bg { position:fixed; inset:0; z-index:0; background: radial-gradient(ellipse 80% 60% at 60% 30%, rgba(60,20,120,0.55) 0%, transparent 70%), radial-gradient(ellipse 50% 40% at 20% 90%, rgba(30,10,80,0.4) 0%, transparent 60%), #060a18; }
+    .particles { position:fixed; inset:0; z-index:1; pointer-events:none; overflow:hidden; }
+    .particle { position:absolute; border-radius:50%; opacity:0; animation:floatUp linear infinite; }
+    @keyframes floatUp { 0%{opacity:0;transform:translateY(0) scale(0);} 10%{opacity:0.6;} 90%{opacity:0.2;} 100%{opacity:0;transform:translateY(-100vh) scale(1.5);} }
+
+    .wrap { position:relative; z-index:2; max-width:720px; margin:0 auto; padding:40px 24px 64px; }
+    .eyebrow { text-align:center; font-size:11px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:var(--p3); opacity:0.85; margin-bottom:12px; }
+    h1 { font-family:'Cormorant Garamond',serif; font-weight:300; font-size:clamp(30px,5vw,46px); line-height:1.1; text-align:center; margin-bottom:14px; }
+    h1 em { font-style:italic; background:linear-gradient(135deg,var(--p3),#c4b5fd,var(--p2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .intro { text-align:center; font-size:14.5px; font-weight:300; line-height:1.75; color:rgba(214,217,240,0.72); max-width:520px; margin:0 auto 28px; }
+
+    .controls { display:flex; flex-direction:column; align-items:center; gap:18px; margin-bottom:28px; }
+    .btn-draw { display:inline-flex; align-items:center; gap:12px; padding:16px 34px; border-radius:60px; font-family:'Outfit',sans-serif; font-size:16px; font-weight:600; color:#fff; cursor:pointer; border:1px solid rgba(163,139,250,0.35); background:rgba(123,92,255,0.14); backdrop-filter:blur(20px); box-shadow:inset 0 1px 0 rgba(255,255,255,0.12), 0 8px 32px rgba(0,0,0,0.3), 0 0 40px rgba(123,92,255,0.18); transition:all .35s cubic-bezier(0.22,1,0.36,1); }
+    .btn-draw:hover { background:rgba(123,92,255,0.24); border-color:rgba(163,139,250,0.6); box-shadow:0 0 60px rgba(123,92,255,0.4); transform:translateY(-2px); }
+
+    .axes-label { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(214,217,240,0.5); text-align:center; }
+    .chips { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; max-width:640px; }
+    .chip { font-size:12px; font-weight:500; padding:7px 14px; border-radius:50px; cursor:pointer; color:rgba(214,217,240,0.8); border:1px solid rgba(123,92,255,0.22); background:rgba(123,92,255,0.06); transition:all .2s ease; }
+    .chip:hover { border-color:rgba(163,139,250,0.55); background:rgba(123,92,255,0.16); }
+    .chip.active { color:#fff; border-color:var(--p3); background:rgba(123,92,255,0.3); box-shadow:0 0 18px rgba(123,92,255,0.35); }
+
+    /* Carte parchemin */
+    .parch { display:none; position:relative; margin:6px auto 0; max-width:600px; padding:38px 40px 34px; border-radius:14px; color:var(--ink); background:linear-gradient(160deg,#f6ecd6 0%,#efe0c4 60%,#e6d4b3 100%); box-shadow:0 24px 60px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.35), inset 0 0 60px rgba(180,150,90,0.25); font-family:'Cormorant Garamond',serif; animation:cardIn .5s cubic-bezier(0.22,1,0.36,1) both; }
+    @keyframes cardIn { from{opacity:0;transform:translateY(14px) scale(.98);} to{opacity:1;transform:none;} }
+    .parch.show { display:block; }
+    .parch .axe { font-family:'Outfit',sans-serif; font-size:10.5px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:#9a7b34; }
+    .parch h2 { font-weight:600; font-size:29px; line-height:1.15; margin:6px 0 4px; }
+    .parch .duree { font-family:'Outfit',sans-serif; font-size:12px; color:#8a744f; margin-bottom:18px; }
+    .parch .phrase { font-style:italic; font-size:22px; line-height:1.4; text-align:center; color:#5a4a2a; padding:14px 8px; margin:6px 0 20px; border-top:1px solid rgba(154,123,52,0.3); border-bottom:1px solid rgba(154,123,52,0.3); }
+    .parch .sect-label { font-family:'Outfit',sans-serif; font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#9a7b34; margin:16px 0 8px; }
+    .parch ol { list-style:none; counter-reset:step; padding:0; }
+    .parch ol li { font-size:18px; line-height:1.5; padding:5px 0 5px 34px; position:relative; }
+    .parch ol li::before { counter-increment:step; content:counter(step); position:absolute; left:0; top:5px; width:22px; height:22px; border-radius:50%; background:rgba(154,123,52,0.18); color:#7a6229; font-family:'Outfit',sans-serif; font-size:12px; font-weight:600; display:flex; align-items:center; justify-content:center; }
+    .parch .cloture { font-size:17px; line-height:1.5; color:#5a4a2a; }
+    .parch .cloture::before { content:'🕯️ '; }
+    .parch .indic { font-family:'Outfit',sans-serif; font-size:12px; color:#8a744f; margin-top:18px; padding-top:12px; border-top:1px dashed rgba(154,123,52,0.3); }
+
+    .card-actions { display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin-top:22px; }
+    .btn2 { display:inline-flex; align-items:center; gap:9px; padding:13px 24px; border-radius:50px; font-family:'Outfit',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:all .3s ease; border:1px solid rgba(163,139,250,0.35); background:rgba(123,92,255,0.12); color:#fff; backdrop-filter:blur(14px); }
+    .btn2:hover { background:rgba(123,92,255,0.24); transform:translateY(-2px); }
+    .btn2.gold { border-color:rgba(244,200,66,0.5); background:rgba(244,200,66,0.14); }
+    .btn2.gold:hover { background:rgba(244,200,66,0.24); box-shadow:0 0 30px rgba(244,200,66,0.3); }
+
+    .state { text-align:center; color:rgba(214,217,240,0.6); font-size:14px; padding:30px 0; }
+    @media(max-width:560px){ .parch{padding:30px 22px;} .parch h2{font-size:25px;} .parch .phrase{font-size:19px;} }
+  </style>
+</head>
+<body>
+  <div class="bg"></div>
+  <div class="particles" id="particles"></div>
+
+  <div class="wrap">
+    <div class="eyebrow">🪞 Atelier du Miroir</div>
+    <h1>Retrouver une amie<br><em>dans le miroir</em></h1>
+    <p class="intro">
+      Ici, le miroir n'est jamais une accusation — c'est un lieu d'observation douce.
+      Tire un exercice au hasard, ou choisis un axe qui te parle. Fais-le à ton rythme, une étape à la fois. 💜
+    </p>
+
+    <div class="controls" id="controls" style="display:none">
+      <button class="btn-draw" id="btn-draw">🎲 Tire-moi un exercice</button>
+      <div class="axes-label">ou choisis un axe</div>
+      <div class="chips" id="chips"></div>
+    </div>
+
+    <div class="state" id="state">✦ Chargement des exercices…</div>
+
+    <div class="parch" id="parch">
+      <div class="axe" id="p-axe"></div>
+      <h2 id="p-titre"></h2>
+      <div class="duree" id="p-duree"></div>
+      <div class="phrase" id="p-phrase"></div>
+      <div class="sect-label">Les étapes</div>
+      <ol id="p-etapes"></ol>
+      <div class="sect-label">Clôture</div>
+      <div class="cloture" id="p-cloture"></div>
+      <div class="indic" id="p-indic"></div>
+    </div>
+
+    <div class="card-actions" id="actions" style="display:none">
+      <button class="btn2" id="btn-again">🎲 Tirer un autre</button>
+      <button class="btn2 gold" id="btn-selena">🪞 Approfondir avec Séléna →</button>
+    </div>
+  </div>
+
+  <script>
+    // ── Auth : récupère le token comme les pages de chat ──
+    var token = sessionStorage.getItem('nyxia_token') || '';
+    try { var q = new URLSearchParams(location.search); if (q.get('t') || q.get('token')) token = q.get('t') || q.get('token'); } catch(e){}
+    try { if (!token && window.parent && window.parent !== window) token = window.parent.sessionStorage.getItem('nyxia_token') || ''; } catch(e){}
+    if (token) { try { sessionStorage.setItem('nyxia_token', token); } catch(e){} }
+
+    function el(id){ return document.getElementById(id); }
+    function esc(s){ var d=document.createElement('div'); d.textContent = (s==null?'':s); return d.innerHTML; }
+
+    // ── Lecture tolérante aux noms de champs ──
+    function F(ex){
+      return {
+        titre: ex.titre || ex.title || 'Exercice',
+        axe: ex.axe || ex.theme || ex.themes || '',
+        duree: ex.duree || ex.duration || '',
+        phrase: ex.phrase || ex.mantra || '',
+        etapes: ex.etapes || ex["étapes"] || ex.steps || ex.consigne || ex.contenu || '',
+        cloture: ex.cloture || ex["clôture"] || '',
+        indic: ex.indications || ex.mots_cles || ex.keywords || ''
+      };
+    }
+    function splitSteps(txt){
+      return String(txt||'').split(/\.\s+/).map(function(s){ return s.replace(/\.+$/,'').trim(); }).filter(function(s){ return s.length > 1; });
+    }
+
+    var ALL = [], POOL = [], AXES = [], activeAxe = null, current = null;
+
+    function load(){
+      if (!token){ el('state').textContent = "Session expirée. Reconnecte-toi depuis le portail."; return; }
+      fetch('/api/miroir/exercices', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ token: token }) })
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          ALL = (d && d.exercices) || [];
+          if (!ALL.length){ el('state').textContent = "Aucun exercice trouvé pour l'instant."; return; }
+          POOL = ALL.slice();
+          AXES = [];
+          ALL.forEach(function(ex){ var a = F(ex).axe; if (a && AXES.indexOf(a) < 0) AXES.push(a); });
+          buildChips();
+          el('state').style.display = 'none';
+          el('controls').style.display = 'flex';
+        })
+        .catch(function(){ el('state').textContent = "Petite interruption… réessaie dans un instant."; });
+    }
+
+    function buildChips(){
+      var c = el('chips'); c.innerHTML = '';
+      var allChip = document.createElement('div'); allChip.className = 'chip active'; allChip.textContent = '✦ Tous';
+      allChip.onclick = function(){ setAxe(null, allChip); }; c.appendChild(allChip);
+      AXES.forEach(function(a){
+        var chip = document.createElement('div'); chip.className = 'chip'; chip.textContent = a;
+        chip.onclick = function(){ setAxe(a, chip); }; c.appendChild(chip);
+      });
+    }
+    function setAxe(axe, chipEl){
+      activeAxe = axe;
+      POOL = axe ? ALL.filter(function(ex){ return F(ex).axe === axe; }) : ALL.slice();
+      document.querySelectorAll('.chip').forEach(function(x){ x.classList.remove('active'); });
+      if (chipEl) chipEl.classList.add('active');
+      draw();
+    }
+
+    function draw(){
+      if (!POOL.length) return;
+      var pick;
+      if (POOL.length === 1) pick = POOL[0];
+      else { do { pick = POOL[Math.floor(Math.random()*POOL.length)]; } while (current && pick === current && POOL.length > 1); }
+      current = pick;
+      render(F(pick));
+    }
+
+    function render(f){
+      el('p-axe').textContent = f.axe || '';
+      el('p-titre').textContent = f.titre;
+      el('p-duree').textContent = f.duree ? ('⏳ ' + f.duree) : '';
+      el('p-phrase').textContent = f.phrase ? ('« ' + f.phrase + ' »') : '';
+      var ol = el('p-etapes'); ol.innerHTML = '';
+      splitSteps(f.etapes).forEach(function(s){ var li = document.createElement('li'); li.textContent = s; ol.appendChild(li); });
+      el('p-cloture').textContent = f.cloture || '';
+      el('p-indic').textContent = f.indic ? ('Indiqué pour : ' + f.indic) : '';
+      el('parch').classList.add('show');
+      el('actions').style.display = 'flex';
+      el('parch').scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+
+    // ── Pont vers Séléna : dépose l'exercice, demande au dashboard d'ouvrir Séléna ──
+    function approfondir(){
+      if (!current) return;
+      var f = F(current);
+      var prompt = "J'aimerais approfondir cet exercice du miroir avec toi : « " + f.titre + " »"
+        + (f.axe ? (" (axe : " + f.axe + ")") : "") + ".\n\n"
+        + (f.phrase ? ("Phrase : " + f.phrase + "\n") : "")
+        + (f.etapes ? ("Étapes : " + f.etapes + "\n") : "")
+        + (f.cloture ? ("Clôture : " + f.cloture + "\n") : "")
+        + "\nPeux-tu m'accompagner à le vivre, à mon rythme, une seule étape à la fois ?";
+      try { sessionStorage.setItem('pending_selena', prompt); } catch(e){}
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type:'nyxia_open', agent:'selena' }, '*');
+      } else {
+        location.href = '/chat-selena.html?t=' + encodeURIComponent(token);
+      }
+    }
+
+    el('btn-draw').addEventListener('click', draw);
+    el('btn-again').addEventListener('click', draw);
+    el('btn-selena').addEventListener('click', approfondir);
+
+    // ── Particules ──
+    (function(){
+      var c = el('particles'); var cl = ["#a78bfa","#7B5CFF","#5A6CFF","#c4b5fd","#ffffff"];
+      for (var i=0;i<24;i++){ var p=document.createElement('div'); p.className='particle';
+        var s=Math.random()*3+1;
+        p.style.cssText="width:"+s+"px;height:"+s+"px;left:"+(Math.random()*100)+"%;bottom:"+(Math.random()*-20)+"%;animation-duration:"+(Math.random()*12+8)+"s;animation-delay:"+(Math.random()*10)+"s;";
+        p.style.background=cl[Math.floor(Math.random()*cl.length)]; c.appendChild(p); }
+    })();
+
+    load();
+  </script>
+</body>
+</html>
