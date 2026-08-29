@@ -155,6 +155,15 @@
     el('input').addEventListener('input', function(){ this.style.height='auto'; this.style.height=Math.min(this.scrollHeight,120)+'px'; });
     setupMic();
     foRefreshLaunchButton();
+    // Pont depuis la page Miroir : si un exercice a été déposé, Séléna le reçoit et le lance automatiquement.
+    try {
+      var pend = sessionStorage.getItem('pending_selena');
+      if (pend) {
+        sessionStorage.removeItem('pending_selena');
+        var inp = el('input');
+        if (inp) { inp.value = pend; setTimeout(function(){ send(); }, 500); }
+      }
+    } catch(e){}
   }
 
   function addUser(text){
