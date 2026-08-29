@@ -1,5 +1,5 @@
 // ============================================================
-// NyXia — Portail Léna · Découvrir vos dons — Worker complet (chats + voix + images + D1)
+// NyXia — Portail Séléna · Retrouver une amie dans le miroir — Worker complet (chats + voix + images + D1)
 // ============================================================
 
 const SYSTEM_PROMPTS = {
@@ -822,7 +822,16 @@ Avant chaque réponse, demande-toi :
 
 **« Quelle question, quelle compréhension ou quel exercice peut aider {first_name} à se rencontrer avec plus de vérité et de douceur maintenant? »**
 
-Puis accompagne une seule étape à la fois.`,
+Puis accompagne une seule étape à la fois.`
+  🖋️ TES ASSISTANTES
+  Dans ton portail, trois assistantes spécialisées possèdent maintenant leur propre espace de conversation. Tu connais leur rôle et tu peux orienter {first_name} vers celle qui correspond a la situation :
+
+- **Daphnée** — spécialisée en nutrition.
+
+- **Alexandra** — spécialisée stress, angoisse, anxiété, nervosité, traumatisme.
+
+- **Gabrielle** — spécialisée libération émotionnelle. 
+    ,
   // ✍️ ALEX — Écriture · storytelling · copywriting · livres complets
   alex: `Tu incarnes **Alex**, l'assistant de Diane et le maître d'écriture de l'univers NyXia.
 
@@ -4380,7 +4389,7 @@ async function handleAdminSendMessage(request, env) {
   return json({ success: true, sentTo: 1 });
 }
 
-// ───────────── RÉPERTOIRE DES MÉDIAS MAGIQUES ─────────────
+// ───────────── RÉPERTOIRE DES MÉDIAS  ─────────────
 // Agrège Pexels + Unsplash (images/vidéos) et Freesound (sons) sous une
 // bannière unique "NyXia". Toutes les URLs renvoyées au navigateur passent
 // par /api/media/file — le domaine du fournisseur n'est JAMAIS exposé,
@@ -4546,8 +4555,8 @@ async function handleMediaFile(request, env, url) {
 }
 
 // ───────────── VOIX — liste IMMUABLE (sauf demande explicite) ─────────────
-// NyXia, Diane, Léna, Sophia, Cassandre, Aletheia, Céleste  → ElevenLabs exclusivement.
-// Éric, Kael, et Séléna → OpenAI TTS tant qu'aucun identifiant
+// NyXia, Diane, Léna, Sophia, Cassandre, Aletheia, Céleste,Séléna, Daphnée, Alexandra, Gabrielle  → ElevenLabs exclusivement.
+// Éric, Kael → OpenAI TTS tant qu'aucun identifiant
 // ElevenLabs ne leur est explicitement attribué.
 //
 // ElevenLabs : header xi-api-key, model eleven_multilingual_v2,
@@ -4563,7 +4572,10 @@ const AGENT_ELEVENLABS_VOICE_ID_KEYS = {
   aletheia: 'ELEVENLABS_ALETHEIA_VOICE_ID',
   cassandre: 'ELEVENLABS_CASSANDRE_VOICE_ID',
   celeste: 'ELEVENLABS_CELESTE_VOICE_ID',
-  
+  selena: 'ELEVENLABS_SELENA_VOICE_ID',
+  daphnee: 'ELEVENLABS_DAPHNEE_VOICE_ID',
+  alexandra: 'ELEVENLABS_ALEXANDRA_VOICE_ID',
+  gabrielle: 'ELEVENLABS_GABRIELLE_VOICE_ID',
 };
 
 // Defaults si le secret Cloudflare n'est pas encore défini
@@ -4582,6 +4594,10 @@ const ELEVENLABS_VOICE_ID_DEFAULTS = {
   aletheia: 'taOhVGnnfgm0gEJnfB0f',
   cassandre: 'YxrwjAKoUKULGd0g8K9Y',
   celeste: '7VoxpuBC4ZIcnW14yi9m'
+  selena: 'bBRsDJSAcL1ubkrtJ3hM'
+  daphnee: 'mActWQg9kibLro6Z2ouY'
+  Alexandra: 'Ix5oBMHpatfp3naMIpLk'
+  gabrielle: 'gCr8TeSJgJaeaIoV4RWH'
 };
 
 // HeyGen en réserve uniquement (non utilisé si ElevenLabs répond)
