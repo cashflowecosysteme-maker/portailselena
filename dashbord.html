@@ -323,7 +323,7 @@
 
   <div class="app-body">
     <aside>
-      <!-- PERSONNAGES DU PORTAIL Léna -->
+      <!-- PERSONNAGES DU PORTAIL Séléna -->
       <div class="sidebar-section">
         <div class="sidebar-label">Mes Conversations</div>
         <div class="nav-item active" id="nav-diane" onclick="openAgentTab('diane')">
@@ -336,40 +336,32 @@
           <span class="nav-text"><span class="nav-name">NyXia</span><span class="nav-sub">Orientation & technique</span></span>
           <span class="nav-arrow">›</span>
         </div>
-        <div class="nav-item" id="nav-lena" onclick="openAgentTab('lena')">
-          <img class="nav-avatar" src="/Lena.png" alt="Léna">
-          <span class="nav-text"><span class="nav-name">Léna</span><span class="nav-sub">Médium & dons</span></span>
+        <div class="nav-item" id="nav-selena" onclick="openAgentTab('selena')">
+          <img class="nav-avatar" src="/Selena.png" alt="Léna">
+          <span class="nav-text"><span class="nav-name">Séléna</span><span class="nav-sub">Développement Personnel</span></span>
           <span class="nav-arrow">›</span>
         </div>
       </div>
       <div class="sidebar-section">
         <div class="sidebar-label">Atelier de développement</div>
 
-        <div class="nav-item" id="nav-sophia" onclick="openAgentTab('sophia')">
-          <img class="nav-avatar" src="/Sophia.png" alt="Sophia">
-          <span class="nav-text"><span class="nav-name">🔢 Sophia</span><span class="nav-sub">La Tisseuse des Nombres</span></span>
+        <div class="nav-item" id="nav-gabrielle" onclick="openAgentTab('sophia')">
+          <img class="nav-avatar" src="/Gabrielle.png" alt="Gabrielle">
+          <span class="nav-text"><span class="nav-name">👋 Gabrielle</span><span class="nav-sub">Spécialiste EFT</span></span>
           <span class="nav-arrow">›</span>
         </div>
 
-        <div class="nav-item" id="nav-aletheia" onclick="openAgentTab('aletheia')">
-          <img class="nav-avatar" src="/Aletheia.png" alt="Aletheia">
-          <span class="nav-text"><span class="nav-name">ᚱ Aletheia</span><span class="nav-sub">La Scribe des Murmures Runiques</span></span>
+        <div class="nav-item" id="nav-alexandra" onclick="openAgentTab('alexandra')">
+          <img class="nav-avatar" src="/Alexandra.png" alt="Aletheia">
+          <span class="nav-text"><span class="nav-name">🧘 Alexandra</span><span class="nav-sub">Spécialiste Stress</span></span>
           <span class="nav-arrow">›</span>
         </div>
 
-        <div class="nav-item" id="nav-cassandre" onclick="openAgentTab('cassandre')">
-          <img class="nav-avatar" src="/Cassandre.png" alt="Cassandre">
-          <span class="nav-text"><span class="nav-name">🃏 Cassandre</span><span class="nav-sub">La Voix du Reflet</span></span>
+        <div class="nav-item" id="nav-daphnee" onclick="openAgentTab('daphnee')">
+          <img class="nav-avatar" src="/Daphnee.png" alt="Cassandre">
+          <span class="nav-text"><span class="nav-name">🍲 Daphnée</span><span class="nav-sub">Recettes Santé</span></span>
           <span class="nav-arrow">›</span>
         </div>
-
-        <div class="nav-item" id="nav-celeste" onclick="openAgentTab('celeste')">
-          <img class="nav-avatar" src="/Celeste.png" alt="Céleste">
-          <span class="nav-text"><span class="nav-name">✦ Céleste</span><span class="nav-sub">La Cartographe des Présages</span></span>
-          <span class="nav-arrow">›</span>
-        </div>
-      </div>
-
       
       <div class="sidebar-section">
         <div class="sidebar-label">Outils</div>
@@ -377,12 +369,6 @@
         <div class="nav-item" id="nav-messages" onclick="showPanel('messages'); if(typeof loadMessages==='function')loadMessages()">
           <span class="nav-icon">💬</span> Messagerie
           <span id="unread-badge" style="display:none;margin-left:auto;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#ff4b6e;color:#fff;font-size:11px;font-weight:700;line-height:20px;text-align:center"></span>
-          <span class="nav-arrow">›</span>
-        </div>
-
-        <div class="nav-item" id="nav-ovilus" onclick="openAgentTab('ovilus')">
-          <span class="nav-avatar" style="display:flex;align-items:center;justify-content:center;font-size:18px;background:rgba(123,92,255,0.15);border-radius:50%">🔮</span>
-          <span class="nav-text"><span class="nav-name">Ovilus</span><span class="nav-sub">Communication spirite</span></span>
           <span class="nav-arrow">›</span>
         </div>
 
@@ -396,7 +382,7 @@
           <div class="user-avatar" id="sidebar-avatar">D</div>
           <div class="user-info">
             <div class="user-name" id="sidebar-username">Chargement...</div>
-            <div class="user-plan">✦ Découvrir ces dons</div>
+            <div class="user-plan">✦ Retrouvez une amie dans le miroir</div>
           </div>
         </div>
       </div>
@@ -474,9 +460,8 @@
       lena:   ['Julie','Audrey','Ariane','Microsoft Julie','Amélie','Caroline','Microsoft Hortense']
     }
     var AGENT_VOICE_GENDER = {
-      nyxia: 'feminine', diane: 'feminine', lena: 'feminine', aimee: 'feminine',
-      alibi: 'feminine', constance: 'feminine', fripouille: 'feminine',
-      melusine: 'feminine', abime: 'feminine'
+      nyxia: 'feminine', diane: 'feminine', lena: 'feminine', daphee: 'feminine',
+      gabrielle: 'feminine', alexandra: 'feminine'
     }
     var _cachedVoices = null;
     function pickBestFrenchVoice(voices, agentKey) {
@@ -659,7 +644,7 @@
       var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML
     }
 
-    /* ═══════ RÉPERTOIRE DES MÉDIAS MAGIQUES ═══════ */
+    /* ═══════ RÉPERTOIRE DES MÉDIAS  ═══════ */
     var _mediaTab = 'visual'
     var _mediaFormat = ''
 
@@ -733,7 +718,7 @@
     })
 
     /* ═══════ NAVIGATION ═══════ */
-    var WRITING_WORKSHOP_AGENTS = ['aimee', 'alibi', 'constance', 'fripouille', 'melusine', 'abime']
+    var WRITING_WORKSHOP_AGENTS = ['daphnee', 'alexandra', 'gabrielle']
 
     function isWritingWorkshopAgent(key) {
       return WRITING_WORKSHOP_AGENTS.indexOf(key) !== -1
@@ -806,8 +791,8 @@
 
     /* ═══════ CHAT ═══════ */
     var chatHistories = {
-      diane: [], nyxia: [], alex: [], aimee: [], alibi: [],
-      constance: [], fripouille: [], melusine: [], abime: []
+      diane: [], nyxia: [], selena: [], daphnee: [], alexandra: [],
+      gabrielle: []
     }
     var _nyxiaVoiceAuto = false
     var _micRecognition = null, _micListening = false
@@ -881,8 +866,8 @@
     function sendWelcome() {
       var name = clientName || 'Membre'
       var welcome = '✦ Allô ' + name + ' 💜\n\n' +
-        'Bienvenue dans le portail de Léna, ton atelier vivant pour découvrir tes capacités et dons innés.\n\n' +
-        'Diane t’accompagne, NyXia t’oriente, Alex veille sur ton projet et chaque assistante possède sa spécialité littéraire.\n\n' +
+        'Bienvenue dans le portail de Séléna, ton atelier vivant pour retrouver une amie dans le miroir.\n\n' +
+        'Diane t’accompagne, NyXia t’oriente, Séléna t'aide à te retrouver et chaque assistante possède sa spécialité.\n\n' +
         'Dis-moi simplement ce que tu aimerais découvrir aujourd\'hui aujourd’hui. ✦'
       addBotMessage(welcome)
       addAlphaChoiceButtons()
@@ -891,24 +876,19 @@
     var ALPHA_INFO = {
       diane:      { name: 'Diane',      icon: '👑', sub: 'Créatrice & accompagnement', greeting: '👋 Dis-moi : **qu’aimerais-tu enfin oser écrire aujourd’hui ?** 💜' },
       nyxia:      { name: 'NyXia',      icon: '✦',  sub: 'Orientation & technique', greeting: '👋 Dis-moi : **que veux-tu retrouver ou comprendre dans le portail ?** 💜' },
-      alex:       { name: 'Léna',       icon: '✍️', sub: 'Spiritualité', greeting: '👋 Dis-moi : **quel dons crois-tu avoir ?** ✨' },
-      aimee:      { name: 'Aimée',      icon: '🌹', sub: 'Romans d’amour', greeting: '🌹 Parle-moi de ton histoire et de ses personnages : nous allons lui donner un cœur.' },
-      alibi:      { name: 'Alibi',      icon: '🔎', sub: 'Policier & juridique', greeting: '🔎 Quel mystère, quelle enquête ou quelle incohérence veux-tu travailler ?' },
-      constance:  { name: 'Constance',  icon: '🎭', sub: 'Drames humains', greeting: '🎭 Quelle émotion ou quel conflit humain veux-tu rendre inoubliable ?' },
-      fripouille: { name: 'Fripouille', icon: '🐾', sub: 'Jeunesse & coloriage', greeting: '🐾 Quelle aventure aimerais-tu inventer pour les enfants ?' },
-      melusine:   { name: 'Mélusine',   icon: '🌙', sub: 'Fantasy & science-fiction', greeting: '🌙 Quel monde, quelle magie ou quel futur veux-tu faire naître ?' },
-      abime:      { name: 'Abîme',      icon: '🕯️', sub: 'Romans d’horreur', greeting: '🕯️ Quelle peur, tension ou atmosphère veux-tu installer dans ton récit ?' }
+      selena:       { name: 'Séléna',       icon: '🪞', sub: 'Miroir', greeting: '👋 Dis-moi : **aimerais-tu faire un exercice miroir ?** ✨' },
+      daphnee:      { name: 'Daphnée',      icon: '🍲', sub: 'Nutrition', greeting: '🍲 Parle-moi de tes goûts alimentaires.' },
+      alexandra:      { name: 'Alexandra',      icon: '🧘', sub: 'Spécialiste du stress', greeting: '🧘 Qu'est-ce qui te préoccupe actuellement ?' },
+      gabrielle:  { name: 'Gabrielle',  icon: '🎭', sub: 'Spécialiste EFT', greeting: '🎭 Quelle émotion t'habite en ce moment ?' }
+      
     }
     var AGENT_IMAGES = {
       nyxia: '/NyXia.png',
       diane: '/Diane.png',
-      alex: '/Lena.png',
-      aimee: '/Aimee.png',
-      alibi: '/Alibi.png',
-      constance: '/Constance.png',
-      fripouille: '/Fripouille.png',
-      melusine: '/Melusine.png',
-      abime: '/Abime.png'
+      selena: '/Selena.png',
+      daphnee: '/Daphnee.png',
+      alexandra: '/Alexandra.png',
+      gabrielle: '/Gabrielle.png'
     }
     function avatarHtmlFor(key, sizeClass) {
       sizeClass = sizeClass || 'msg-avatar'
@@ -988,19 +968,11 @@
     var AGENT_PAGES = {
       nyxia:  '/chat-nyxia.html',
       diane:  '/chat-diane.html',
-      lena:   '/chat-lena.html',
-      sophia: '/chat-sophia.html',
-      aletheia: '/chat-aletheia.html',
-      cassandre: '/chat-cassandre.html',
-      celeste: '/chat-celeste.html',
-      ovilus: '/ovilus.html',
-      aimee:  '/chat-aimee.html',
-      alibi:  '/chat-alibi.html',
-      constance: '/chat-constance.html',
-      fripouille: '/chat-fripouille.html',
-      melusine: '/chat-melusine.html',
-      abime: '/chat-abime.html',
-      authortools: '/outils-auteur.html',
+      selena:   '/chat-selena.html',
+      daphnee: '/chat-daphnee.html',
+      alexandra: '/chat-alexandra.html',
+      gabrielle: '/chat-gabrielle.html',
+     miroir: '/miroir.html',
       coverstudio: '/studio-couverture.html'
     }
 
@@ -1308,7 +1280,7 @@
     var AGENT_WELCOME_AUDIO = {
       nyxia: '/AccueilNyXiaClientes.mp3',
       diane: '/Bienvenue_Diane.mp3',
-      alex: '', aimee: '', alibi: '', constance: '', fripouille: '', melusine: '', abime: ''
+      selena: '', daphnee: '', alexandra: '', gabrielle: '', fripouille: '', melusine: '', abime: ''
     }
 
     // Les futures vidéos universelles peuvent être ajoutées ici, personnage par personnage.
