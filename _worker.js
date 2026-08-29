@@ -4594,10 +4594,10 @@ const ELEVENLABS_VOICE_ID_DEFAULTS = {
   sophia: 'WQKwBV2Uzw1gSGr69N8I',
   aletheia: 'taOhVGnnfgm0gEJnfB0f',
   cassandre: 'YxrwjAKoUKULGd0g8K9Y',
-  celeste: '7VoxpuBC4ZIcnW14yi9m'
-  selena: 'bBRsDJSAcL1ubkrtJ3hM'
-  daphnee: 'mActWQg9kibLro6Z2ouY'
-  Alexandra: 'Ix5oBMHpatfp3naMIpLk'
+  celeste: '7VoxpuBC4ZIcnW14yi9m',
+  selena: 'bBRsDJSAcL1ubkrtJ3hM',
+  daphnee: 'mActWQg9kibLro6Z2ouY',
+  Alexandra: 'Ix5oBMHpatfp3naMIpLk',
   gabrielle: 'gCr8TeSJgJaeaIoV4RWH'
 };
 
