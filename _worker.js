@@ -1826,6 +1826,12 @@ function renderFormationBlocForChat(bloc, ctx) {
   } else if (type === 'exercice') {
     if (bloc.objectif) parts.push('🎯 ' + String(bloc.objectif).trim());
     if (bloc.consigne) parts.push(String(bloc.consigne).trim());
+  } else if (type === 'lien') {
+    if (bloc.intro) parts.push(String(bloc.intro).trim());
+    const lienUrl = String(bloc.url || bloc.lien || '').trim();
+    const lienLabel = String(bloc.titre || 'Ouvrir le document').trim();
+    if (isHttpsUrl(lienUrl)) parts.push('[LIEN: ' + lienUrl + ' | ' + lienLabel + ']');
+    else if (bloc.contenu) parts.push(String(bloc.contenu).trim());
   } else {
     parts.push(String(bloc.contenu || bloc.url || '').trim());
   }
