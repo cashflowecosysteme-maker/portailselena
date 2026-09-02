@@ -1598,7 +1598,7 @@ function normalizeFormationModules(formation) {
 }
 
 function portalSlug(env) {
-  return String((env && (env.PORTAIL || env.PORTAL || env.PORTAL_SLUG)) || 'lena').toLowerCase();
+  return String((env && (env.PORTAIL || env.PORTAL || env.PORTAL_SLUG)) || 'selena').toLowerCase();
 }
 async function listFormations(env, agent) {
   const out = [];
