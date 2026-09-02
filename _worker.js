@@ -1582,7 +1582,7 @@ function sanitizeApprovedMediaMarkers(content, markerName, approvedUrls, max) {
 // ───────────── FORMATION VIVANTE — catalogue + progression (KV) ─────────────
 // Pour ce lot, la Formation Vivante concerne Léna. Tout est additif : rien ne remplace le système vidéo Vectorize existant.
 const FORMATION_AGENT = 'lena';
-const FORMATION_AGENTS = new Set(['lena', 'sophia', 'aletheia', 'cassandre', 'celeste']);
+const FORMATION_AGENTS = new Set(['lena', 'selena', 'sophia', 'aletheia', 'cassandre', 'celeste', 'gabrielle', 'alexandra', 'daphnee']);
 
 function formationDocKey(agent, id) { return `formation:${agent}:${id}`; }
 function formationProgressKey(email) { return `formation_progress:${String(email || '').toLowerCase()}`; }
