@@ -397,6 +397,18 @@
 
 
   function useSuggestion(btn) {
+    // Bouton média : si data-audio / data-video est présent, le personnage présente un lecteur (sans passer par le modèle).
+    var _au = btn.getAttribute('data-audio')
+    var _vi = btn.getAttribute('data-video')
+    var _intro = btn.getAttribute('data-intro') || ''
+    if (_au || _vi) {
+      var _body = _intro
+      if (_au) _body += (_body ? '\n\n' : '') + '[AUDIO: ' + _au.trim() + ']'
+      if (_vi) _body += (_body ? '\n\n' : '') + '[VIDEO: ' + _vi.trim() + ']'
+      addBotMessage(_body)
+      return  // on NE cache PAS les boutons : ils restent disponibles
+    }
+    // Comportement normal : envoyer le texte du bouton au personnage
     var text = (btn.textContent || '').trim()
     if (!text) return
     var input = document.getElementById('chat-input')
