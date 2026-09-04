@@ -134,9 +134,9 @@
       </button>
     </div>
     <div class="suggestions" id="suggestions">
-      <button type="button" class="sug-chip" onclick="useSuggestion(this)"> | 🧘‍♀️ SOS Stress |</button>
-      <button type="button" class="sug-chip" onclick="useSuggestion(this)">Apaiser</button>
-      <button type="button" class="sug-chip" onclick="useSuggestion(this)">Nommer</button>
+      <button type="button" class="sug-chip" onclick="useSuggestion(this)">Prompt pour mieux structurer une réponse en consultation spirituelle</button>
+      <button type="button" class="sug-chip" onclick="useSuggestion(this)">Prompt pour un contenu spirituel éthique et rassurant</button>
+      <button type="button" class="sug-chip" onclick="useSuggestion(this)">Prompt pour une offre d'accompagnement spirituel claire</button>
     </div>
 
     <div id="attach-bar" style="display:none;padding:6px 20px;background:rgba(123,92,255,0.08);border-top:1px solid rgba(123,92,255,0.1);align-items:center;gap:8px;flex-shrink:0;font-size:12px;color:var(--t3)">
@@ -397,6 +397,18 @@
 
 
   function useSuggestion(btn) {
+    // Bouton média : si data-audio / data-video est présent, le personnage présente un lecteur (sans passer par le modèle).
+    var _au = btn.getAttribute('data-audio')
+    var _vi = btn.getAttribute('data-video')
+    var _intro = btn.getAttribute('data-intro') || ''
+    if (_au || _vi) {
+      var _body = _intro
+      if (_au) _body += (_body ? '\n\n' : '') + '[AUDIO: ' + _au.trim() + ']'
+      if (_vi) _body += (_body ? '\n\n' : '') + '[VIDEO: ' + _vi.trim() + ']'
+      addBotMessage(_body)
+      return  // on NE cache PAS les boutons : ils restent disponibles
+    }
+    // Comportement normal : envoyer le texte du bouton au personnage
     var text = (btn.textContent || '').trim()
     if (!text) return
     var input = document.getElementById('chat-input')
