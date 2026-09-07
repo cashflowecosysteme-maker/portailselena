@@ -4679,7 +4679,7 @@ const ELEVENLABS_VOICE_ID_DEFAULTS = {
   celeste: '7VoxpuBC4ZIcnW14yi9m',
   selena: 'bBRsDJSAcL1ubkrtJ3hM',
   daphnee: 'mActWQg9kibLro6Z2ouY',
-  Alexandra: 'Ix5oBMHpatfp3naMIpLk',
+  Alexandra: 'ELf3eScSrJr0jn1jDw8T',
   gabrielle: 'gCr8TeSJgJaeaIoV4RWH'
 };
 
