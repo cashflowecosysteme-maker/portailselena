@@ -1,3 +1,80 @@
+// Accès NyXia commun : comptes et droits existants conservés.
+const NX_ACCESS_ID='selena',NX_ACCESS_HOST='portailselena.nyxia.top',NX_ACCESS_ALIASES=["selena", "portailselena"],NX_ACCESS_SESSION_PREFIX='session:';
+const nxNorm=v=>String(v||'').trim().toLowerCase();
+async function nxRead(env,key,fallback=null){const raw=await env.CASHFLOW_KV.get(key);try{return raw?JSON.parse(raw):fallback}catch(_){return fallback}}
+async function nxHash(password,salt){const e=new TextEncoder(),k=await crypto.subtle.importKey('raw',e.encode(password),'PBKDF2',false,['deriveBits']),b=await crypto.subtle.deriveBits({name:'PBKDF2',salt:e.encode(salt),iterations:100000,hash:'SHA-256'},k,256);return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function nxSame(a,b){if(typeof a!=='string'||typeof b!=='string'||a.length!==b.length)return false;let d=0;for(let i=0;i<a.length;i++)d|=a.charCodeAt(i)^b.charCodeAt(i);return d===0}
+function nxMessage(a){return a.startsAt&&Date.parse(a.startsAt)>Date.now()?'Ton Accès Gratuit au portail n’a pas encore commencé.':'Ton Accès Gratuit au portail est terminé ou a été retiré.'}
+async function nxPortalIds(env){const ids=new Set(NX_ACCESS_ALIASES.map(nxNorm));ids.add(NX_ACCESS_ID);for(const p of await nxRead(env,'univers:portals',[])){if(nxNorm(p.host)===NX_ACCESS_HOST)ids.add(nxNorm(p.id))}return ids}
+async function nxAccess(env,email,pending=false){
+ email=nxNorm(email);if(!email)return{allowed:false};
+ const client=await nxRead(env,'client:'+email,{});if(client.active===false)return{allowed:false};
+ const ids=await nxPortalIds(env),permanent=await nxRead(env,'univers:access:permanent',[]);
+ if(permanent.some(p=>nxNorm(p.email)===email&&(p.allPortals||(p.portalIds||[]).some(id=>ids.has(nxNorm(id))))))return{allowed:true,type:'permanent'};
+ if((client.products||[]).some(id=>ids.has(nxNorm(id))))return{allowed:true,type:'purchased'};
+ const campaigns=await nxRead(env,'univers:degustations',[]);let cursor,best=null;const now=Date.now();
+ do{const page=await env.CASHFLOW_KV.list({prefix:'univers:access:grant:'+encodeURIComponent(email)+':',cursor});for(const k of page.keys||[]){
+  const g=await nxRead(env,k.name);if(!g||!ids.has(nxNorm(g.portalId)))continue;
+  const c=campaigns.find(c=>c.id===g.campaignId);if(!c||c.status!=='active'||!(c.portalIds||[]).includes(g.portalId))continue;
+  const startsAt=c.fixedStartAt||'',start=startsAt?Date.parse(startsAt):-Infinity,hardEnd=c.fixedEndAt?Date.parse(c.fixedEndAt):Infinity;
+  if(Number.isNaN(start)||Number.isNaN(hardEnd)||hardEnd<=now)continue;
+  const end=g.pending?hardEnd:Math.min(Date.parse(g.expiresAt||''),hardEnd);
+  if(Number.isNaN(end)||end<=now||(!g.pending&&!Number.isFinite(end))||(g.pending&&!pending))continue;
+  const a={allowed:!g.pending&&start<=now,type:'temporary',pending:!!g.pending,startsAt,expiresAt:Number.isFinite(end)?new Date(end).toISOString():null,campaign:c};
+  const rank=x=>x.allowed?3:x.pending&&(!x.startsAt||Date.parse(x.startsAt)<=now)?2:1;
+  if(!best||rank(a)>rank(best)||(rank(a)===rank(best)&&end>Date.parse(best.expiresAt||'1970-01-01')))best=a;
+ }cursor=page.list_complete?null:page.cursor}while(cursor);
+ return best||{allowed:false};
+}
+async function nxStart(env,email,a){
+ if(!a.pending||!a.campaign||(a.startsAt&&Date.parse(a.startsAt)>Date.now()))return;
+ const c=a.campaign,key='univers:access:activation:'+encodeURIComponent(email)+':'+c.id,old=await nxRead(env,key);if(!old)return;
+ let update;if(!old.pending&&old.startedAt)update={pending:false,startedAt:old.startedAt,expiresAt:old.expiresAt};
+ else{const duration=Number(c.durationHours);if(!Number.isFinite(duration)||duration<=0)return;const startedAt=new Date().toISOString();update={pending:false,startedAt,expiresAt:c.fixedEndAt||new Date(Date.parse(startedAt)+duration*3600000).toISOString(),updatedAt:startedAt};await env.CASHFLOW_KV.put(key,JSON.stringify({...old,...update}))}
+ for(const id of c.portalIds||[]){const k='univers:access:grant:'+encodeURIComponent(email)+':'+c.id+':'+id,g=await nxRead(env,k);if(g&&g.pending)await env.CASHFLOW_KV.put(k,JSON.stringify({...g,...update}))}
+}
+async function nxSession(env,token){
+ if(!token)return null;const s=await nxRead(env,NX_ACCESS_SESSION_PREFIX+token);if(!s||s.portal!==NX_ACCESS_ID||!s.email)return null;
+ const client=await nxRead(env,'client:'+nxNorm(s.email));if(client?.active===false)return null;
+ if(s.authSource==='d1'){
+  if(!env.DB)return null;let user;try{user=await env.DB.prepare('SELECT id, email, password_hash, role FROM users WHERE id = ? AND email = ? LIMIT 1').bind(s.userId,nxNorm(s.email)).first()}catch(_){return null}
+  if(!user||!nxSame(user.password_hash,s.credentialVersion)||user.role!==s.role)return null;
+  if(user.role==='admin')return s;
+ }else if(!client||(client.authVersion||'')!==(s.authVersion||'')||!nxSame(client.passwordHash,s.credentialVersion))return null;
+ const access=await nxAccess(env,s.email);return access.allowed?{...s,accessType:access.type,expiresAt:access.expiresAt||null}:null;
+}
+async function nxLogin(req,env){
+ const b=await req.json().catch(()=>({})),email=nxNorm(b.email),password=String(b.password||''),firstname=String(b.firstname||b.firstName||'').trim(),remember=!!b.remember;
+ if(!email||!password||!firstname)return json({error:'Prénom, adresse courriel et mot de passe requis.'},400);
+ const client=await nxRead(env,'client:'+email);if(client?.active===false)return json({error:'Identifiants incorrects.'},401);
+ let valid=false,account={};
+ if(client?.passwordHash&&client.salt)valid=nxSame(await nxHash(password,client.salt),client.passwordHash);
+ else if(typeof client?.password==='string'&&client.password)valid=nxSame(password,client.password);
+ if(!valid&&env.DB&&typeof verifyPasswordAffil==='function'){
+  try{const rows=await env.DB.prepare("SELECT id, email, password_hash, full_name, role, affiliate_code, paypal_email FROM users WHERE email = ? AND role IN ('admin', 'affiliate') ORDER BY CASE role WHEN 'admin' THEN 0 ELSE 1 END, created_at ASC").bind(email).all();for(const u of rows.results||[]){if(await verifyPasswordAffil(password,u.password_hash)){valid=true;account={authSource:'d1',userId:u.id,role:u.role,code:u.affiliate_code||'',paypal:u.paypal_email||'',credentialVersion:u.password_hash};break}}}catch(_){}
+ }
+ if(!valid)return json({error:'Identifiants incorrects.'},401);
+ const initial=await nxAccess(env,email,true);if(initial.pending)await nxStart(env,email,initial);
+ const access=account.authSource==='d1'&&account.role==='admin'?{allowed:true,type:'admin'}:await nxAccess(env,email);
+ if(!access.allowed)return json({error:nxMessage(initial)},403);
+ if(client&&!client.passwordHash&&client.password&&!account.authSource){client.salt=crypto.randomUUID();client.passwordHash=await nxHash(password,client.salt);delete client.password;await env.CASHFLOW_KV.put('client:'+email,JSON.stringify(client))}
+ const token=crypto.randomUUID()+crypto.randomUUID(),ttl=remember?2592000:43200,s={...account,email,firstname,portal:NX_ACCESS_ID,accessType:access.type,expiresAt:access.expiresAt||null,authVersion:client?.authVersion||'',credentialVersion:account.credentialVersion||client?.passwordHash||'',remember};
+ await env.CASHFLOW_KV.put(NX_ACCESS_SESSION_PREFIX+token,JSON.stringify(s),{expirationTtl:ttl});
+ // Les outils historiques de Léna lisent aussi session:<token>.
+ if(NX_ACCESS_ID==='lena')await env.CASHFLOW_KV.put('session:'+token,JSON.stringify(s),{expirationTtl:ttl});
+ const {credentialVersion,...publicUser}=s;
+ const response=json({success:true,token,firstname,user:publicUser,remember,role:s.role||'',code:s.code||''});
+ response.headers.set('Cache-Control','no-store');response.headers.set('Set-Cookie','nyxia_portal_session='+encodeURIComponent(token)+'; Path=/; HttpOnly; Secure; SameSite=Lax'+(remember||NX_ACCESS_ID==='portail-dylan-reiki'?'; Max-Age='+ttl:''));return response;
+}
+async function nxToken(req){const u=new URL(req.url),h=req.headers.get('Authorization')||'',cookie=req.headers.get('Cookie')||'';let token=u.searchParams.get('t')||u.searchParams.get('token')||h.match(/^Bearer\s+(.+)$/i)?.[1]||req.headers.get('X-Cercle-Token')||'';if(req.method!=='GET'&&req.method!=='HEAD'){try{const b=await req.clone().json();token=b.token||token}catch(_){}}if(!token){try{token=decodeURIComponent(cookie.match(/(?:^|;\s*)nyxia_portal_session=([^;]+)/)?.[1]||'')}catch(_){}}return token}
+async function nxGuard(req,env){
+ const path=new URL(req.url).pathname;
+ const privateApi=/^\/api\/(?:chat(?:\/|$)|tts(?:\/|$)|media(?:\/|$)|formation(?:\/|$)|parcours(?:\/|$)|author(?:\/|$)|cover(?:\/|$)|alex(?:\/|$)|ovilus(?:\/|$)|miroir(?:\/|$)|image(?:\/|$)|messagerie(?:\/|$)|messages(?:\/|$)|gardiennes(?:\/|$)|agent(?:\/|$))/.test(path);
+ if(req.method==='OPTIONS')return null;
+ if(privateApi&&!(await nxSession(env,await nxToken(req))))return json({error:'Session expirée. Reconnecte-toi.'},401);
+ return null;
+}
+
 // ============================================================
 // NyXia — Portail Séléna · Retrouver une amie dans le miroir — Worker complet (chats + voix + images + D1)
 // ============================================================
@@ -2969,6 +3046,7 @@ export default {
     try { if (env.DB) await ensureSchema(env); } catch (e) { console.error("schema", e); }
 const url = new URL(request.url);
     const path = url.pathname;
+    try{const denied=await nxGuard(request,env);if(denied)return denied;}catch(e){return json({error:'Vérification de l’accès indisponible.'},503)}
 
     // La racine reste réservée à index.html : la page de vente du portail Léna.
     if (path === '/login') {
@@ -3059,7 +3137,7 @@ const url = new URL(request.url);
     const PROTECTED_PAGES = ['/dashbord.html', '/ovilus.html'];
     const isProtected = PROTECTED_PAGES.includes(path) || path.startsWith('/chat-');
     if (isProtected && env.CASHFLOW_KV) {
-      const tok = url.searchParams.get('t') || url.searchParams.get('token') || '';
+      const tok = await nxToken(request);
       const session = tok ? await getSessionFromToken(env, tok) : null;
       if (!session) {
         return Response.redirect(url.origin + '/login', 302);
@@ -3178,81 +3256,9 @@ async function ensureSchema(env) {
   ]);
 }
 
-async function handleLogin(request, env) {
-  const body = await request.json();
-  const email = (body.email || '').toLowerCase().trim();
-  const password = body.password || '';
-  const firstname = (body.firstname || body.firstName || '').trim();
-  if (!email || !password) return json({ error: 'Email et mot de passe requis.' }, 400);
+async function handleLogin(request,env){return nxLogin(request,env)}
 
-  // 1) Compte Cercles (D1) — Admin / Promoteur
-  if (env.DB) {
-    try {
-      await ensureSchema(env);
-      const candidates = await env.DB.prepare(
-        `SELECT id, email, password_hash, full_name, role, affiliate_code, paypal_email
-         FROM users WHERE email = ? AND role IN ('admin', 'affiliate')
-         ORDER BY CASE role WHEN 'admin' THEN 0 ELSE 1 END, created_at ASC`
-      ).bind(email).all();
-      const list = candidates.results || [];
-      for (const user of list) {
-        if (await verifyPasswordAffil(password, user.password_hash)) {
-          const token = randomToken();
-          const session = {
-            email: user.email,
-            firstname: user.full_name || firstname || '',
-            role: user.role,
-            code: user.affiliate_code || '',
-            paypal: user.paypal_email || '',
-            userId: user.id
-          };
-          // session: → compatible chats Studio (voix, images, PDF, copier)
-          await env.CASHFLOW_KV.put(`session:${token}`, JSON.stringify(session), { expirationTtl: SESSION_TTL });
-          return json({ success: true, token, firstname: session.firstname, role: session.role, code: session.code });
-        }
-      }
-    } catch (e) {
-      console.error('login D1', e);
-    }
-  }
-
-  // 2) Fallback clients KV Studio (si existants)
-  const raw = await env.CASHFLOW_KV.get(`client:${email}`);
-  if (raw) {
-    const client = JSON.parse(raw);
-    const valid = await verifyPassword(password, client.salt, client.passwordHash);
-    if (valid) {
-      const token = randomToken();
-      await env.CASHFLOW_KV.put(
-        `session:${token}`,
-        JSON.stringify({ email: client.email, firstname: client.firstName || client.name || '' }),
-        { expirationTtl: SESSION_TTL }
-      );
-      return json({ success: true, token, firstname: client.firstName || client.name || '' });
-    }
-  }
-
-  return json({ error: 'Courriel ou mot de passe incorrect.' }, 401);
-}
-
-async function handleCheckAuth(request, env) {
-  const body = await request.json().catch(() => ({}));
-  const token = body.token || null;
-  if (!token) return json({ valid: false });
-  const raw = await env.CASHFLOW_KV.get(`session:${token}`);
-  if (!raw) return json({ valid: false });
-  const session = JSON.parse(raw);
-  return json({
-    valid: true,
-    email: session.email,
-    firstname: session.firstname,
-    role: session.role || '',
-    code: session.code || '',
-    paypal: session.paypal || '',
-    portal: 'lena-decouvrir-dons',
-    portal_access: true
-  });
-}
+async function handleCheckAuth(request,env){const body=await request.json().catch(()=>({})),s=await nxSession(env,body.token||await nxToken(request));return json({valid:!!s,email:s?.email||'',firstname:s?.firstname||'',role:s?.role||'',code:s?.code||'',paypal:s?.paypal||'',portal:NX_ACCESS_ID,portal_access:!!s})}
 
 async function handleLogout(request, env) {
   const body = await request.json().catch(() => ({}));
@@ -4221,14 +4227,7 @@ async function handleAdminChangePassword(request, env) {
 
 // ───────────── MESSAGERIE INTERNE ─────────────
 
-async function getSessionOrNull(token, env) {
-  if (!token) return null;
-  const raw = await env.CASHFLOW_KV.get(`session:${token}`);
-  if (!raw) return null;
-  let session;
-  try { session = JSON.parse(raw); } catch (_) { return null; }
-  return session;
-}
+async function getSessionOrNull(token,env){return nxSession(env,token)}
 
 // Destinataires messagerie client : Super Admin (UI) + staff/adjoint UNIQUEMENT.
 // Les clients ordinaires ne se voient PAS entre eux.
@@ -4795,14 +4794,7 @@ async function retrieveSelenaMirrorExercises(env, query, limit = 3) {
 
 // ───────────── FORMATION VIVANTE — HANDLERS API ─────────────
 
-async function getSessionFromToken(env, token) {
-  if (!token) return null;
-  try {
-    const raw = await env.CASHFLOW_KV.get(`session:${token}`);
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch (_) { return null; }
-}
+async function getSessionFromToken(env,token){return nxSession(env,token)}
 
 // Liste légère des formations d'un personnage + progression de la personne.
 async function handleFormationList(request, env) {
@@ -5256,3 +5248,4 @@ async function handleTTSCachedAudio(request, env, url) {
 
   return new Response(audio, { status: 200, headers: { 'Content-Type': 'audio/mpeg' } });
 }
+
