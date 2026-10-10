@@ -3079,12 +3079,23 @@ async function nxDashboardBoutique(){
  }catch(_){return json({error:'Connexion à la Boutique NyXia impossible.'},502)}
 }
 
+
+// Catalogue public existant du Cercle NyXia.
+async function nyxiaDashboardCercle(){
+ try{
+  const response=await fetch('https://repertoire.nyxia.top/api/repertoire',{headers:{Accept:'application/json'}});
+  if(!response.ok)return json({error:'Répertoire du Cercle indisponible.'},502);
+  const data=await response.json();return json({products:Array.isArray(data.products)?data.products:[]});
+ }catch(_){return json({error:'Connexion au Répertoire du Cercle impossible.'},502)}
+}
+
 export default {
   async fetch(request, env) {
     
     try { if (env.DB) await ensureSchema(env); } catch (e) { console.error("schema", e); }
 const url = new URL(request.url);
     const path = url.pathname;
+    if(path==='/api/nyxia-universe/repertoire'&&request.method==='GET')return await nyxiaDashboardCercle();
     if(path==='/api/nyxia-universe/boutique'&&request.method==='GET')return await nxDashboardBoutique();
     if(new URL(request.url).pathname==='/api/password/change'&&request.method==='POST')return await nxDashboardPasswordChange(request,env);
     try{const denied=await nxGuard(request,env);if(denied)return denied;}catch(e){return json({error:'Vérification de l’accès indisponible.'},503)}
@@ -5289,5 +5300,6 @@ async function handleTTSCachedAudio(request, env, url) {
 
   return new Response(audio, { status: 200, headers: { 'Content-Type': 'audio/mpeg' } });
 }
+
 
 

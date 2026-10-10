@@ -382,7 +382,7 @@
         </div>
       </div>
       
-      <div class="sidebar-section"><div class="nav-item" id="nav-parcours" onclick="openNyxiaParcours()"><span class="nav-icon">🌌</span> Mon Parcours <span class="nav-arrow">›</span></div></div>
+      <div class="sidebar-section"><div class="nav-item" id="nav-parcours" onclick="openNyxiaParcours()"><span class="nav-icon">🌌</span> Mon Parcours <span class="nav-arrow">›</span></div><div class="nav-item" id="nav-cercle" onclick="openNyxiaCercle()"><span class="nav-icon">💜</span> Cercle d’entraide <span class="nav-arrow">›</span></div></div>
       <div class="sidebar-bottom">
         <div class="user-card">
           <div class="user-avatar" id="sidebar-avatar">D</div>
@@ -395,6 +395,7 @@
     </aside>
 
     <div class="main-content">
+      <div class="panel" id="panel-cercle" style="flex-direction:column"><iframe id="cercle-iframe" src="about:blank" style="width:100%;height:100%;border:none;display:block" title="Cercle d’entraide"></iframe></div>
       <div class="panel" id="panel-parcours" style="flex-direction:column"><iframe id="parcours-iframe" src="about:blank" style="width:100%;height:100%;border:none;display:block" title="Mon Parcours"></iframe></div>
       <!-- Panel Chat — charge la page individuelle du personnage en iframe -->
       <div class="panel active" id="panel-chat" style="flex-direction:column">
@@ -1404,6 +1405,15 @@ window.addEventListener('message',function(event){
 });
 </script>
 
+
+<script>
+function openNyxiaCercle(){
+ showPanel('cercle');
+ var frame=document.getElementById('cercle-iframe');
+ if(frame&&!frame.getAttribute('data-loaded')){frame.src='/cercle-entraide.html';frame.setAttribute('data-loaded','1')}
+}
+</script>
 </body>
 </html>
+
 
