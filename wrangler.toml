@@ -30,3 +30,5 @@ SITE_URL = "portailselena.nyxia.top"
 [[kv_namespaces]]
 binding = "SPIRITUEL_KV"
 id = "3e730b1c49f94e32a97cceff3b60a773"
+SYSTEME_ACTIVATION_FIELD = "lien_activation_nyxia"
+SYSTEME_ACTIVATION_TAG_ID = "2221814"
