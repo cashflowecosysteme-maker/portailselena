@@ -3040,12 +3040,53 @@ async function handleCoverImage(request, env, url) {
 }
 
 
+
+// Changement de mot de passe depuis le tableau de bord.
+async function nxDashboardPasswordChange(request,env){
+ const body=await request.json().catch(()=>({})),token=body.token||await nxToken(request),s=await nxSession(env,token);
+ if(!s)return json({error:'Session expirée. Reconnecte-toi.'},401);
+ const password=String(body.password||''),current=String(body.currentPassword||'');
+ if(password.length<8||password.length>1024)return json({error:'Le nouveau mot de passe doit contenir entre 8 et 1024 caractères.'},400);
+ if(password!==body.confirm)return json({error:'Les deux nouveaux mots de passe ne correspondent pas.'},400);
+ const email=nxNorm(s.email);
+ if(s.authSource==='d1'){
+  if(!env.DB||typeof verifyPasswordAffil!=='function'||typeof hashPasswordAffil!=='function')return json({error:'Ce type de compte ne permet pas ce changement ici.'},400);
+  const user=await env.DB.prepare('SELECT password_hash FROM users WHERE id = ? AND email = ? LIMIT 1').bind(s.userId,email).first();
+  if(!user||!await verifyPasswordAffil(current,user.password_hash))return json({error:'Le mot de passe actuel est incorrect.'},400);
+  const next=await hashPasswordAffil(password);
+  const updated=await env.DB.prepare('UPDATE users SET password_hash = ? WHERE id = ? AND email = ? AND password_hash = ?').bind(next,s.userId,email,user.password_hash).run();
+  if(updated.meta&&updated.meta.changes!==1)return json({error:'Le compte a changé. Reconnecte-toi puis réessaie.'},409);
+ }else{
+  const key='client:'+email,client=await nxRead(env,key);
+  const valid=client?.passwordHash&&client.salt?nxSame(await nxHash(current,client.salt),client.passwordHash):nxSame(current,client?.password);
+  if(!valid)return json({error:'Le mot de passe actuel est incorrect.'},400);
+  client.salt=crypto.randomUUID();client.passwordHash=await nxHash(password,client.salt);client.authVersion=crypto.randomUUID();delete client.password;
+  await env.CASHFLOW_KV.put(key,JSON.stringify(client));
+ }
+ for(const prefix of ['session:','portal:session:']){let cursor;do{const page=await env.CASHFLOW_KV.list({prefix,cursor});for(const k of page.keys||[]){const old=await nxRead(env,k.name);if(nxNorm(old?.email)===email)await env.CASHFLOW_KV.delete(k.name)}cursor=page.list_complete?null:page.cursor}while(cursor)}
+ const response=json({success:true,message:'Mot de passe modifié. Reconnecte-toi avec ton nouveau mot de passe.'});
+ response.headers.set('Cache-Control','no-store');response.headers.set('Set-Cookie','nyxia_portal_session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0');return response;
+}
+
+
+// Lecture du catalogue existant, sans modification des produits.
+async function nxDashboardBoutique(){
+ try{
+  const [catalog,config]=await Promise.all([fetch('https://boutique.nyxia.top/api/catalog'),fetch('https://boutique.nyxia.top/api/config')]);
+  if(!catalog.ok)return json({error:'Boutique indisponible.'},502);
+  const data=await catalog.json(),settings=config.ok?await config.json():{};
+  return json({products:Array.isArray(data.products)?data.products:[],settings:settings.settings||{}});
+ }catch(_){return json({error:'Connexion à la Boutique NyXia impossible.'},502)}
+}
+
 export default {
   async fetch(request, env) {
     
     try { if (env.DB) await ensureSchema(env); } catch (e) { console.error("schema", e); }
 const url = new URL(request.url);
     const path = url.pathname;
+    if(path==='/api/nyxia-universe/boutique'&&request.method==='GET')return await nxDashboardBoutique();
+    if(new URL(request.url).pathname==='/api/password/change'&&request.method==='POST')return await nxDashboardPasswordChange(request,env);
     try{const denied=await nxGuard(request,env);if(denied)return denied;}catch(e){return json({error:'Vérification de l’accès indisponible.'},503)}
 
     // La racine reste réservée à index.html : la page de vente du portail Léna.
@@ -5248,4 +5289,5 @@ async function handleTTSCachedAudio(request, env, url) {
 
   return new Response(audio, { status: 200, headers: { 'Content-Type': 'audio/mpeg' } });
 }
+
 
