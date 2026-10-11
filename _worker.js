@@ -3175,6 +3175,7 @@ const url = new URL(request.url);
 
       // ── Répertoire des Médias Magiques ──
       if (path === '/api/media/images' && request.method === 'POST') return await handleMediaImages(request, env);
+      if (path === '/api/media/videos' && request.method === 'POST') return await handleMediaVideos(request, env);
       if (path === '/api/media/sounds' && request.method === 'POST') return await handleMediaSounds(request, env);
       if (path === '/api/media/file' && request.method === 'GET') return await handleMediaFile(request, env, url);
 
@@ -4554,6 +4555,9 @@ function orientationFor(format, provider) {
   return null;
 }
 
+function mediaRatio(format){return {'square':1,'1:1':1,'portrait':9/16,'9:16':9/16,'landscape':16/9,'16:9':16/9,'4:5':4/5,'3:2':3/2}[format]||0}
+function mediaMatches(format,width,height){const target=mediaRatio(format);return !target||(Number(width)>0&&Number(height)>0&&Math.abs(Number(width)/Number(height)/target-1)<=0.015)}
+function mediaFormatSize(format){const ratio=mediaRatio(format);return{orientation:ratio===1?'square':ratio>1?'landscape':ratio?'portrait':'',pixabayOrientation:ratio>1?'horizontal':ratio&&ratio<1?'vertical':'all'}}
 async function handleMediaImages(request, env) {
   const { token, query, format } = await request.json();
   const session = await getSessionOrNull(token, env);
@@ -4561,8 +4565,8 @@ async function handleMediaImages(request, env) {
   if (!query) return json({ error: 'Recherche requise.' }, 400);
 
   const results = [];
-  const pexelsOrient = orientationFor(format, 'pexels');
-  const unsplashOrient = orientationFor(format, 'unsplash');
+  const pexelsOrient = orientationFor(format==='1:1'?'square':format==='16:9'||format==='3:2'?'landscape':format==='9:16'||format==='4:5'?'portrait':format, 'pexels');
+  const unsplashOrient = orientationFor(format==='1:1'?'square':format==='16:9'||format==='3:2'?'landscape':format==='9:16'||format==='4:5'?'portrait':format, 'unsplash');
 
   // Source 1 — photos
   try {
@@ -4571,31 +4575,11 @@ async function handleMediaImages(request, env) {
     const r = await fetch(u, { headers: { Authorization: env.PEXELS_KEY } });
     if (r.ok) {
       const data = await r.json();
-      (data.photos || []).forEach(p => {
+      (data.photos || []).filter(p=>mediaMatches(format,p.width,p.height)).forEach(p => {
         results.push({
-          id: 'a_' + p.id, type: 'image',
+          width:p.width, height:p.height, id: 'a_' + p.id, type: 'image',
           previewUrl: mediaProxyUrl(p.src.medium, token),
           downloadUrl: mediaProxyUrl(p.src.large, token, { download: true, name: `nyxia-image-${p.id}.jpg` }),
-          credit: 'NyXia'
-        });
-      });
-    }
-  } catch (e) {}
-
-  // Source 1 — vidéos
-  try {
-    let u = `https://api.pexels.com/videos/search?query=${encodeURIComponent(query)}&per_page=8`;
-    if (pexelsOrient) u += `&orientation=${pexelsOrient}`;
-    const r = await fetch(u, { headers: { Authorization: env.PEXELS_KEY } });
-    if (r.ok) {
-      const data = await r.json();
-      (data.videos || []).forEach(v => {
-        const file = (v.video_files || []).find(f => f.quality === 'sd') || (v.video_files || [])[0];
-        if (file) results.push({
-          id: 'b_' + v.id, type: 'video',
-          previewUrl: mediaProxyUrl(v.image, token),
-          videoUrl: mediaProxyUrl(file.link, token),
-          downloadUrl: mediaProxyUrl(file.link, token, { download: true, name: `nyxia-video-${v.id}.mp4` }),
           credit: 'NyXia'
         });
       });
@@ -4609,9 +4593,9 @@ async function handleMediaImages(request, env) {
     const r = await fetch(u, { headers: { Authorization: `Client-ID ${env.UNSPLASH_KEY}` } });
     if (r.ok) {
       const data = await r.json();
-      (data.results || []).forEach(p => {
+      (data.results || []).filter(p=>mediaMatches(format,p.width,p.height)).forEach(p => {
         results.push({
-          id: 'c_' + p.id, type: 'image',
+          width:p.width, height:p.height, id: 'c_' + p.id, type: 'image',
           previewUrl: mediaProxyUrl(p.urls.small, token),
           downloadUrl: mediaProxyUrl(p.urls.regular, token, { download: true, name: `nyxia-image-${p.id}.jpg` }),
           credit: 'NyXia'
@@ -4625,6 +4609,39 @@ async function handleMediaImages(request, env) {
     const j = Math.floor(Math.random() * (i + 1));
     [results[i], results[j]] = [results[j], results[i]];
   }
+
+  return json({ success: true, results });
+}
+
+async function handleMediaVideos(request, env) {
+  const { token, query, format } = await request.json();
+  const session = await getSessionOrNull(token, env);
+  if (!session) return json({ error: 'Session expirée.' }, 401);
+  if (!query) return json({ error: 'Recherche requise.' }, 400);
+
+  const results = [];
+  const pexelsOrient = orientationFor(format==='1:1'?'square':format==='16:9'?'landscape':format==='9:16'?'portrait':format, 'pexels');
+  const unsplashOrient = orientationFor(format==='1:1'?'square':format==='16:9'?'landscape':format==='9:16'?'portrait':format, 'unsplash');
+
+  // Source 1 — vidéos
+  try {
+    let u = `https://api.pexels.com/videos/search?query=${encodeURIComponent(query)}&per_page=8`;
+    if (pexelsOrient) u += `&orientation=${pexelsOrient}`;
+    const r = await fetch(u, { headers: { Authorization: env.PEXELS_KEY } });
+    if (r.ok) {
+      const data = await r.json();
+      (data.videos || []).forEach(v => {
+        const file = (v.video_files || []).filter(f=>mediaMatches(format,f.width,f.height)).sort((a,b)=>(b.width||0)-(a.width||0))[0];
+        if (file) results.push({
+          width:file.width, height:file.height, id: 'b_' + v.id, type: 'video',
+          previewUrl: mediaProxyUrl(v.image, token),
+          videoUrl: mediaProxyUrl(file.link, token),
+          downloadUrl: mediaProxyUrl(file.link, token, { download: true, name: `nyxia-video-${v.id}.mp4` }),
+          credit: 'NyXia'
+        });
+      });
+    }
+  } catch (e) {}
 
   return json({ success: true, results });
 }
