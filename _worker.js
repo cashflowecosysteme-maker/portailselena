@@ -4535,7 +4535,6 @@ async function handleAdminSendMessage(request, env) {
 const MEDIA_ALLOWED_HOSTS = [
   'images.pexels.com', 'videos.pexels.com',
   'images.unsplash.com',
-  'cdn.pixabay.com', 'pixabay.com', 'i.vimeocdn.com',
   'cdn.freesound.org', 'freesound.org',
   'heygen.ai'
 ];
@@ -4605,25 +4604,6 @@ async function handleMediaImages(request, env) {
     }
   } catch (e) {}
 
-
-  // Pixabay images — intégration indépendante des autres fournisseurs.
-  if (env.PIXABAY_KEY_IMAGES || env.PIXABAY_KEY || env.PIXABAY_API_KEY) {
-    try {
-      const pixKey = env.PIXABAY_KEY_IMAGES || env.PIXABAY_KEY || env.PIXABAY_API_KEY;
-      const ratio = ({'16:9':16/9,'9:16':9/16,'3:2':3/2,'4:5':4/5,'1:1':1})[format] || 0;
-      const orientation = ratio > 1 ? 'horizontal' : ratio && ratio < 1 ? 'vertical' : 'all';
-      const u = 'https://pixabay.com/api/?key='+encodeURIComponent(pixKey)+'&q='+encodeURIComponent(query)+'&per_page=20&safesearch=true&orientation='+orientation;
-      const r = await fetch(u);
-      if (!r.ok) throw new Error('Pixabay Images HTTP '+r.status);
-      const data = await r.json();
-      for (const p of data.hits || []) {
-        const file = p.largeImageURL || p.webformatURL;
-        if (!file || !mediaMatches(format,p.imageWidth,p.imageHeight)) continue;
-        results.push({width:p.imageWidth,height:p.imageHeight,id:'pixabay_'+p.id,type:'image',previewUrl:mediaProxyUrl(p.webformatURL||file,token),downloadUrl:mediaProxyUrl(file,token,{download:true,name:'nyxia-image-'+p.id+'.jpg'}),credit:'NyXia'});
-      }
-    } catch (e) { console.error('NyXia Pixabay Images:', String(e)); }
-  }
-
   // Mélange pour que ce soit une seule banque homogène, jamais groupée par source
   for (let i = results.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -4662,25 +4642,6 @@ async function handleMediaVideos(request, env) {
       });
     }
   } catch (e) {}
-
-
-  // Pixabay vidéos — intégration indépendante de Pexels.
-  if (env.PIXABAY_KEY_VIDEO || env.PIXABAY_KEY || env.PIXABAY_API_KEY) {
-    try {
-      const pixKey = env.PIXABAY_KEY_VIDEO || env.PIXABAY_KEY || env.PIXABAY_API_KEY;
-      const u = 'https://pixabay.com/api/videos/?key='+encodeURIComponent(pixKey)+'&q='+encodeURIComponent(query)+'&per_page=15&safesearch=true';
-      const r = await fetch(u);
-      if (!r.ok) throw new Error('Pixabay Vidéos HTTP '+r.status);
-      const data = await r.json();
-      for (const v of data.hits || []) {
-        const files = [v.videos?.medium,v.videos?.large,v.videos?.small,v.videos?.tiny].filter(Boolean);
-        const file = files.find(f => f.url && mediaMatches(format,f.width,f.height));
-        if (!file) continue;
-        const thumbnail = 'https://i.vimeocdn.com/video/'+String(v.picture_id||'')+'_640x360.jpg';
-        results.push({width:file.width,height:file.height,id:'pixabay_v_'+v.id,type:'video',previewUrl:mediaProxyUrl(thumbnail,token),videoUrl:mediaProxyUrl(file.url,token),downloadUrl:mediaProxyUrl(file.url,token,{download:true,name:'nyxia-video-'+v.id+'.mp4'}),credit:'NyXia'});
-      }
-    } catch (e) { console.error('NyXia Pixabay Vidéos:', String(e)); }
-  }
 
   return json({ success: true, results });
 }
@@ -5416,7 +5377,7 @@ function nxPremiumHydrateSource(text){
   return text.replace(/\.then\(\s*function\s*\(\s*data\s*\)\s*\{/g,match=>match+'\n'+injection+'\n')
     .replace(/\.then\(\s*data\s*=>\s*\{/g,match=>match+'\n'+injection+'\n');
 }
-export default {
+const nyxBookingOriginalWorker = {
   async fetch(request,env,ctx){
     const response=await nxOriginalWorker.fetch(request,env,ctx);
     const path=new URL(request.url).pathname;
@@ -5439,5 +5400,27 @@ export default {
       }
     }
     return response;
+  }
+};
+
+
+// Liaison commune de l’index aux réservations : aucun écran ni formulaire ajouté.
+export default {
+  ...nyxBookingOriginalWorker,
+  async fetch(request,env,ctx){
+    const page=new URL(request.url).pathname.replace(/\/+$/,'')||'/';
+    const index=request.method==='GET'&&['/','/index','/index.html'].includes(page);
+    let input=request;
+    if(index){const h=new Headers(request.headers);h.delete('If-None-Match');h.delete('If-Modified-Since');input=new Request(request,{headers:h});}
+    const response=await nyxBookingOriginalWorker.fetch(input,env,ctx);
+    if(!index||!response.ok||!(response.headers.get('Content-Type')||'').includes('text/html'))return response;
+    const text=await response.clone().text();
+    if(text.includes('/closer/booking-bridge.js'))return response;
+    const position=text.toLowerCase().lastIndexOf('</body>');
+    if(position<0)return response;
+    const tag='<script src="https://univers.nyxia.top/closer/booking-bridge.js" data-nyxia-portal defer></script>\n';
+    const html=text.slice(0,position)+tag+text.slice(position),headers=new Headers(response.headers);
+    headers.delete('Content-Length');headers.delete('ETag');
+    return new Response(html,{status:response.status,headers});
   }
 };
